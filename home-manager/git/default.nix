@@ -1,4 +1,4 @@
-{ shell, user, ... }:
+{ pkgs, shell, user, ... }:
 {
   programs = {
     git = {
@@ -10,6 +10,9 @@
       };
     };
   };
+  home.packages = with pkgs; [
+    git-filter-repo
+  ];
   imports = [
     ./gh.nix
     ./lazygit
