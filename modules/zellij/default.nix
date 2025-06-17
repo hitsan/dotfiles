@@ -1,4 +1,4 @@
-{ pkgs, shell, home_path, ... }:
+{ pkgs, shell, modules, ... }:
 {
   home.packages = [
     pkgs.zellij
@@ -35,5 +35,5 @@
       }
     '';
   };
-  home.file.".config/zellij/config.kdl".source = "${home_path}/zellij/config.kdl";
+  home.file.".config/zellij/config.kdl".source = "${modules}/zellij/config.kdl";
 }
