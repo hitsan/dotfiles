@@ -22,7 +22,7 @@
       zda = "zellij da -y";
       zsf = "zellij -l strider";
     };
-    initExtra = ''
+    initContent = ''
       function precmd() {
         local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
         local host=$(hostname)
