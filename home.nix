@@ -28,5 +28,5 @@
     home = "home-manager switch --flake ~/dotfiles#hitsan";
     hflake = "home-manager switch --flake ~/dotfiles#hitsan";
   };
-  imports = [ "./modules" ];
+  imports = [ modules ];
 }
