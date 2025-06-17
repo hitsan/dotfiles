@@ -1,9 +1,11 @@
-{ ... }:
+{ pkgs, ... }:
 {
   imports = [
-    ./docker.nix
-    ./ollama.nix
-    ./nix-ld.nix
-    ./discord.nix
+    ./shell
+    ./zellij
+    ./editor
+    ./git
+    ./dev
+    ./docker
   ];
 }

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, user, home, shell, home_path, ... }:
+{ config, pkgs, lib, user, home, shell, modules, ... }:
 {
   home.username = user;
   home.homeDirectory = home;
@@ -28,12 +28,5 @@
     home = "home-manager switch --flake ~/dotfiles#hitsan";
     hflake = "home-manager switch --flake ~/dotfiles#hitsan";
   };
-  imports = [
-    ./shell
-    ./zellij
-    ./editor
-    ./git
-    ./dev
-    ./docker
-  ];
+  imports = [ "./modules" ];
 }

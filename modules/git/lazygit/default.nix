@@ -1,4 +1,4 @@
-{ shell, home_path, ... }:
+{ shell, modules, ... }:
 {
   programs.lazygit = {
     enable = true;
@@ -7,6 +7,6 @@
     lazg = "lazygit";
   };
   home.file.".config/lazygit/config.yml" = {
-    source = "${home_path}/git/lazygit/config.yml";
+    source = "${modules}/git/lazygit/config.yml";
   };
 }

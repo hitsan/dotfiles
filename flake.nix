@@ -1,5 +1,5 @@
 {
-  description = "My flake";
+  description = "My dotfiles";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -16,15 +16,15 @@
     user = "hitsan";
     home = "/home/${user}";
     root = builtins.toString ./.;
-    home_path = "${root}/home-manager";
+    modules = "${root}/modules";
     shell = "zsh";
   in
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user home shell home_path; };
+      extraSpecialArgs = { inherit user home shell modules; };
 
-      modules = [ ./home-manager/home.nix ];
+      modules = [ ./home.nix ];
     };
   };
 }
