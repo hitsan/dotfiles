@@ -1,7 +1,7 @@
 { xremap, user, ... }:
 {
   imports = [
-    xremap.nixoModules.default
+    xremap.nixosModule.default
   ];
   services.xremap = {
     userName = user;
@@ -15,5 +15,6 @@
           };
         }
       ];
+    };
   };
 }
