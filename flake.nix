@@ -7,10 +7,9 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    xremap.url = "github:xremap/nix-flake";
   };
 
-  outputs = { self, nixpkgs, home-manager, xremap }:
+  outputs = { self, nixpkgs, home-manager }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -23,7 +22,7 @@
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user home shell modules xremap; };
+      extraSpecialArgs = { inherit user home shell modules; };
 
       modules = [ ./home.nix ];
     };
