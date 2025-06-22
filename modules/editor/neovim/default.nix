@@ -14,5 +14,6 @@
     rust-analyzer
     gopls
     tree-sitter
+    clang
   ];
 }
