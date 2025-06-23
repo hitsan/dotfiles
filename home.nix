@@ -25,8 +25,8 @@
     l = "eza";
     ll = "eza -l";
     lt = "eza -T";
-    home = "home-manager switch --flake ~/dotfiles#hitsan";
-    hflake = "home-manager switch --flake ~/dotfiles#hitsan";
+    home = "home-manager switch --flake ~/dotfiles#${user}";
+    hflake = "home-manager switch --flake ~/dotfiles#${user}";
   };
   imports = [ modules ];
 }
