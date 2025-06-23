@@ -14,6 +14,7 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     user = "hitsan";
+    email = "soledewa2828@gmail.com";
     home = "/home/${user}";
     root = builtins.toString ./.;
     modules = "${root}/modules";
@@ -22,7 +23,7 @@
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user home shell modules; };
+      extraSpecialArgs = { inherit user email home shell modules; };
 
       modules = [ ./home.nix ];
     };
