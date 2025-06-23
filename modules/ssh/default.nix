@@ -2,7 +2,8 @@
 {
   programs.ssh = {
     enable = true;
-    startAgent = true;
     addKeysToAgent = "yes";
   };
+
+  services.ssh-agent.enable = true;
 }
