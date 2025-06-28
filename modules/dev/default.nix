@@ -12,5 +12,6 @@
   ];
   imports = [
     ./claude
+    ./gemini
   ];
 }
