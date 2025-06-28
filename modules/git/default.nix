@@ -1,4 +1,4 @@
-{ pkgs, shell, user, email, ... }:
+{ pkgs, user, email, ... }:
 {
   programs = {
     git = {

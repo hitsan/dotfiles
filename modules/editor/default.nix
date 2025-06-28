@@ -1,4 +1,4 @@
-{ pkgs, shell, ... }:
+{ ... }:
 {
   imports = [
     ./neovim

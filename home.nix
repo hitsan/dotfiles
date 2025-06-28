@@ -1,4 +1,4 @@
-{ config, pkgs, lib, user, home, shell, modules, xremap, ... }:
+{ pkgs, user, home, shell, modules, ... }:
 {
   home.username = user;
   home.homeDirectory = home;

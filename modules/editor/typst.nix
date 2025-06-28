@@ -1,4 +1,4 @@
-{ pkgs, shell, ... }:
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     typst
