@@ -19,7 +19,7 @@
   programs.home-manager.enable = true;
   programs = {
     fzf.enable = true;
-    zoxide.enable = true;
+                     zoxide.enable = true;
   };
   programs.${shell}.shellAliases = {
     l = "eza";

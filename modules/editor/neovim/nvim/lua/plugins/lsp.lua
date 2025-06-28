@@ -41,6 +41,8 @@ return {
           },
         },
       })
+
+      require("lspconfig").nixd.setup({})
     end,
   },
 }

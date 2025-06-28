@@ -15,5 +15,7 @@
     gopls
     tree-sitter
     clang
+    nixd
+    nixpkgs-fmt
   ];
 }
