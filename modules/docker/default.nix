@@ -1,4 +1,4 @@
-{ ... }:
+{ shell, ... }:
 {
   programs = {
     lazydocker.enable = true;

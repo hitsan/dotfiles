@@ -1,4 +1,4 @@
-{ shell, ... }:
+{ pkgs, modules, shell, ... }:
 {
   home.packages = [
     pkgs.zellij
