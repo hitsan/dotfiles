@@ -14,7 +14,6 @@
     rust-analyzer
     gopls
     tree-sitter
-    clang
     nixd
     nixpkgs-fmt
   ];
