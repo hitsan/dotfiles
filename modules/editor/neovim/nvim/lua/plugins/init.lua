@@ -17,4 +17,5 @@ require("lazy").setup({
   { import = "plugins.cmp" },
   { import = "plugins.treesitter" },
   { import = "plugins.formatter" },
+  { import = "plugins.neotree" },
 })
