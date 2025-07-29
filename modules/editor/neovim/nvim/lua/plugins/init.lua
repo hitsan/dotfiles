@@ -12,10 +12,21 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
+  {
+    "rebelot/kanagawa.nvim",
+    priority = 1000,
+    config = function()
+      require("kanagawa").setup({
+        transparent = true,
+      })
+      vim.cmd.colorscheme "kanagawa"
+    end,
+  },
   { import = "plugins.gitsigns" },
   { import = "plugins.lsp" },
   { import = "plugins.cmp" },
   { import = "plugins.treesitter" },
   { import = "plugins.formatter" },
   { import = "plugins.neotree" },
+  { import = "plugins.toggleterm" },
 })
