@@ -9,7 +9,7 @@ return {
       shell = vim.o.shell,
     })
 
-    vim.keymap.set("n", "<leader>\\", "<cmd>ToggleTerm<CR>", { desc = "ToggleTerm", noremap = true, silent = true })
+    vim.keymap.set("n", "<C-\\>", "<cmd>ToggleTerm<CR>", { desc = "ToggleTerm", noremap = true, silent = true })
   end,
 }
 
