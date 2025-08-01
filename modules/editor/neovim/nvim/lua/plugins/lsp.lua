@@ -2,6 +2,9 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
+      vim.diagnostic.config({
+        virtual_text = true,
+      })
       local on_attach = function(_, bufnr)
         local map = function(mode, lhs, rhs)
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, noremap = true, silent = true })
