@@ -10,6 +10,7 @@
   home.packages = with pkgs; [
     just
     devbox
+    mise
   ];
   imports = [
     ./claude
