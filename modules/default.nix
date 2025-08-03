@@ -7,5 +7,6 @@
     ./git
     ./dev
     ./docker
+    ./lang
   ];
 }
