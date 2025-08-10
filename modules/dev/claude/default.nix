@@ -11,7 +11,7 @@
 
   programs.${shell} = {
     shellAliases = {
-      serena = "claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server --context ide-assistant --project /home/hitsan/dotfiles/modules";
+      serena = "claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server --context ide-assistant --project $(pwd)";
       };
   };
 }
