@@ -9,9 +9,6 @@
       down = "sudo shutdown -h 0";
       stop = "sudo systemctl suspend";
     };
-    shellExtra = {
-      PATH = "${home}/.nix-profile/bin:$PATH";
-    };
     initContent = ''
       PS1='%F{green}$%f '
       setopt no_beep
@@ -19,4 +16,7 @@
 
     dotDir = ".config/zsh";
   };
+  home.sessionPath = [
+    "${home}/.nix-profile/bin"
+  ];
 }
