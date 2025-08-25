@@ -1,4 +1,4 @@
-{ shell, ... }:
+{ shell, home, ... }:
 {
   programs.${shell} = {
     enable = true;
@@ -16,4 +16,7 @@
 
     dotDir = ".config/zsh";
   };
+  home.sessionPath = [
+    "${home}/.nix-profile/bin"
+  ];
 }
