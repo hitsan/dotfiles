@@ -14,7 +14,7 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     user = "hitsan";
-    email = "soledewa2828@gmail.com";
+    email = "15902694+hitsan@users.noreply.github.com";
     home = "/home/${user}";
     root = builtins.toString ./.;
     modules = "${root}/modules";
