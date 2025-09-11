@@ -22,6 +22,8 @@
                      zoxide.enable = true;
   };
   programs.${shell}.shellAliases = {
+    cat = "bat";
+    cd = "z";
     l = "eza";
     ll = "eza -l";
     lt = "eza -T";
