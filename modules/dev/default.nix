@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, shell, ... }:
 {
   programs = {
     direnv = {
@@ -13,6 +13,12 @@
     just
     mise
   ];
+  programs.${shell} = {
+    shellAliases = {
+      glow = "glow -p -w $(tput cols)";
+    };
+  };
+
   imports = [
     ./claude
     ./gemini
