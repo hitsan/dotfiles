@@ -8,8 +8,9 @@
     };
   };
   home.packages = with pkgs; [
-    just
     devbox
+    glow
+    just
     mise
   ];
   imports = [
