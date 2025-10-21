@@ -25,7 +25,7 @@
       setopt no_beep
     '';
 
-    dotDir = ".config/zsh";
+    dotDir = "${home}/.config/zsh";
   };
   
   home.sessionPath = [
