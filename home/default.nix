@@ -13,9 +13,13 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
   programs = {
-    fzf.enable = true;
-                     zoxide.enable = true;
+    ssh = {
+      enable = true;
+      addKeysToAgent = "yes";
+    };
   };
+  
+  services.ssh-agent.enable = true;
   imports = [ 
     ./packages.nix
     ./shell.nix

@@ -4,5 +4,7 @@
     bat
     eza
     jq
+    fzf
+    zoxide
   ];
 }
