@@ -16,16 +16,8 @@
     fzf.enable = true;
                      zoxide.enable = true;
   };
-  programs.${shell}.shellAliases = {
-    cat = "bat";
-    cd = "z";
-    l = "eza";
-    ll = "eza -l";
-    lt = "eza -T";
-    home = "home-manager switch --flake ~/dotfiles#${user}";
-    hflake = "home-manager switch --flake ~/dotfiles#${user}";
-  };
   imports = [ 
     ./packages.nix
+    ./shell.nix
   ];
 }
