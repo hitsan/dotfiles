@@ -22,5 +22,6 @@
   imports = [
     ./claude
     ./gemini
+    ./codex
   ];
 }
