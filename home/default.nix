@@ -1,4 +1,4 @@
-{ pkgs, user, home, shell, modules, ... }:
+{ pkgs, user, home, shell, ... }:
 {
   home.username = user;
   home.homeDirectory = home;
@@ -27,6 +27,5 @@
   };
   imports = [ 
     ./packages.nix
-    modules 
   ];
 }
