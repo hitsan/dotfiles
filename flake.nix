@@ -25,7 +25,7 @@
       inherit pkgs;
       extraSpecialArgs = { inherit user email home shell modules; };
 
-      modules = [ ./home.nix ];
+      modules = [ ./home/default.nix ];
     };
   };
 }

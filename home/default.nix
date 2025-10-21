@@ -4,11 +4,6 @@
   home.homeDirectory = home;
   home.stateVersion = "24.05";
 
-  home.packages = with pkgs; [
-    bat
-    eza
-    jq
-  ];
   home.file = { };
 
   home.sessionVariables = {
@@ -30,5 +25,8 @@
     home = "home-manager switch --flake ~/dotfiles#${user}";
     hflake = "home-manager switch --flake ~/dotfiles#${user}";
   };
-  imports = [ modules ];
+  imports = [ 
+    ./packages.nix
+    modules 
+  ];
 }
