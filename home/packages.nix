@@ -4,7 +4,9 @@
     bat
     eza
     jq
-    fzf
-    zoxide
   ];
+  programs = {
+    fzf.enable = true;
+    zoxide.enable = true;
+  };
 }
