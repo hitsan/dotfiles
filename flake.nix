@@ -26,7 +26,7 @@
       extraSpecialArgs = { inherit user email home shell modules; };
 
       modules = [
-        ./home.nix
+        ./home/default.nix
         ./modules
       ];
     };
