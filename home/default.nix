@@ -2,7 +2,7 @@
 {
   home.username = user;
   home.homeDirectory = home;
-  home.stateVersion = "24.05";
+  home.stateVersion = "25.05";
 
   home.file = { };
 
@@ -20,7 +20,7 @@
   };
   
   services.ssh-agent.enable = true;
-  imports = [ 
+  imports = [
     ./packages.nix
     ./shell.nix
   ];
