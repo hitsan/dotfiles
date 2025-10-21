@@ -7,7 +7,7 @@
     ./typst
     ./git
     ./neovim
-    ./typest
+    ./typst
     ./docker
     ./lang
   ];
