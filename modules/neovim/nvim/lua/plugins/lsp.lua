@@ -5,6 +5,7 @@ return {
       vim.diagnostic.config({
         virtual_text = true,
       })
+
       local on_attach = function(_, bufnr)
         local map = function(mode, lhs, rhs)
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, noremap = true, silent = true })
@@ -13,17 +14,17 @@ return {
         map("n", "K", vim.lsp.buf.hover)
       end
 
-      require("lspconfig").rust_analyzer.setup({
+      vim.lsp.config("rust_analyzer", {
         handlers = {
           ["textDocument/signatureHelp"] = function() end,
         },
         settings = {
-            ["rust-analyzer"] = {
-              cargo = {
+          ["rust-analyzer"] = {
+            cargo = {
               allFeatures = false,
             },
             checkOnSave = {
-             command = "clippy",
+              command = "clippy",
             },
             procMacro = {
               enable = false,
@@ -33,7 +34,7 @@ return {
         on_attach = on_attach,
       })
 
-      require("lspconfig").gopls.setup({
+      vim.lsp.config("gopls", {
         on_attach = on_attach,
         settings = {
           gopls = {
@@ -45,8 +46,11 @@ return {
         },
       })
 
-      require("lspconfig").nixd.setup({})
+      vim.lsp.enable({
+        "rust_analyzer",
+        "gopls",
+        "nixd",
+      })
     end,
   },
 }
-
