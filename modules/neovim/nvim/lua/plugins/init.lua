@@ -29,4 +29,5 @@ require("lazy").setup({
   { import = "plugins.formatter" },
   { import = "plugins.neotree" },
   { import = "plugins.toggleterm" },
+  { import = "plugins.which-key" },
 })
