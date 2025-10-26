@@ -29,7 +29,6 @@ require("lazy").setup({
   { import = "plugins.treesj" },
   { import = "plugins.formatter" },
   { import = "plugins.neotree" },
-  { import = "plugins.devicons" },
   { import = "plugins.toggleterm" },
   { import = "plugins.which-key" },
 })
