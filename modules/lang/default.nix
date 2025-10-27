@@ -3,6 +3,5 @@
  home.packages = with pkgs; [
     clang
     uv
-    nodejs
   ];
 }
