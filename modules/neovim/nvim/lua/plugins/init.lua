@@ -32,4 +32,5 @@ require("lazy").setup({
   { import = "plugins.neotree" },
   { import = "plugins.toggleterm" },
   { import = "plugins.which-key" },
+  { import = "plugins.yazi" },
 })
