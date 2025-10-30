@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, shell, ... }:
 {
   home.packages = with pkgs; [
     bat
@@ -10,5 +10,10 @@
     zoxide.enable = true;
     ripgrep.enable = true;
     yazi.enable = true;
+  };
+  programs.${shell} = {
+    shellAliases = {
+      yz = "yazi";
+    };
   };
 }
