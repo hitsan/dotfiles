@@ -9,5 +9,6 @@
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
+    yazi.enable = true;
   };
 }
