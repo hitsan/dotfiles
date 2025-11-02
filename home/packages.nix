@@ -6,6 +6,7 @@
     jq
   ];
   programs = {
+    fd.enable = true;
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
