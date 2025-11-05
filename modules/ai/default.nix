@@ -4,6 +4,7 @@
     ./claude
     ./gemini
     ./codex
+    ./coderabbit
     # ./sdd 
   ];
 }
