@@ -6,6 +6,7 @@ return {
         virtual_text = true,
       })
 
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
       local on_attach = function(_, bufnr)
         local map = function(mode, lhs, rhs)
           vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, noremap = true, silent = true })
@@ -32,12 +33,14 @@ return {
           },
         },
         on_attach = on_attach,
+        capabilities = capabilities,
       })
 
       local gopls_filetypes = { "go", "gomod", "gowork", "gotmpl" }
       vim.lsp.config("gopls", {
         on_attach = on_attach,
         filetypes = gopls_filetypes,
+        capabilities = capabilities,
         settings = {
           gopls = {
             analyses = {
