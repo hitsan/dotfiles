@@ -7,24 +7,32 @@ return {
     },
     config = function()
       local cmp = require("cmp")
+      local luasnip = require("luasnip")
       cmp.setup({
+        snippet = {
+          expand = function(args)
+            luasnip.lsp_expand(args.body)
+          end,
+        },
         completion = {
-          autocomplete = false,
+          autocomplete = { cmp.TriggerEvent.InsertEnter, cmp.TriggerEvent.TextChanged },
         },
         performance = {
           debounce = 60,
           throttle = 30,
           fetching_timeout = 500,
         },
-        mapping = {
+        mapping = cmp.mapping.preset.insert({
           ["<C-Space>"] = cmp.mapping.complete(),
+          ["<C-@>"] = cmp.mapping.complete(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
-        },
-        sources = {
+        }),
+        sources = cmp.config.sources({
           { name = "nvim_lsp" },
-        },
+        }, {
+          { name = "buffer" },
+        }),
       })
     end,
   },
 }
-
