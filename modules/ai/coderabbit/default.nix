@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, shell, ... }:
 let
   coderabbit = pkgs.stdenvNoCC.mkDerivation {
     pname = "coderabbit";
@@ -27,4 +27,8 @@ let
 in
 {
   home.packages = [ coderabbit ];
+  programs.${shell}.shellAliases = {
+    cr = "coderabbit";
+  };
+
 }
