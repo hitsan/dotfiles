@@ -5,6 +5,6 @@
     ./gemini
     ./codex
     ./coderabbit
-    # ./sdd 
+    ./sdd 
   ];
 }
