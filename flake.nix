@@ -30,5 +30,11 @@
         ./modules
       ];
     };
+
+    # Test suite for validating configuration changes
+    checks.${system} = import ./checks.nix {
+      inherit pkgs system;
+      lib = pkgs.lib;
+    };
   };
 }
