@@ -27,9 +27,9 @@ require("lazy").setup({
   { import = "plugins.cmp" },
   { import = "plugins.treesitter" },
   { import = "plugins.treesj" },
-  { import = "plugins.barbar" },
   { import = "plugins.formatter" },
   { import = "plugins.neotree" },
   { import = "plugins.toggleterm" },
   { import = "plugins.which-key" },
+  { import = "plugins.yazi" },
 })
