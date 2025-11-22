@@ -27,5 +27,6 @@
     ./ai
     ./docker
     ./lang
+    ./xls
   ];
 }
