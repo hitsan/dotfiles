@@ -9,7 +9,7 @@
     claude-code
   ];
 
-  home.file.".local/bin/sync_claude_prompt" = {
+  home.file.".local/bin/sync_prompt" = {
     source = ./sync_prompt.sh;
     executable = true;
   };
