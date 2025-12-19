@@ -1,13 +1,24 @@
 { lib, pkgs, shell, modules, ... }:
 let
   sync_prompt = pkgs.writeShellScriptBin "sync_prompt" ''
-    SOURCE_FILE="${modules}/ai/claude/prompt/instructions.md"
+    SOURCE_DIR="${modules}/ai/claude/template/.claude"
     DEST_DIR="''${PWD}/.claude"
 
-    mkdir -p "''${DEST_DIR}"
-    cp "''${SOURCE_FILE}" "''${DEST_DIR}/instructions.md"
+    # Create directories
+    mkdir -p "''${DEST_DIR}/agents"
 
-    echo "✓ Synced to ''${DEST_DIR}/instructions.md"
+    # Update CLAUDE.md (overwrite)
+    cp "''${SOURCE_DIR}/CLAUDE.md" "''${DEST_DIR}/"
+
+    # Update template agents (overwrite only template files)
+    for agent in "''${SOURCE_DIR}/agents/"*.md; do
+      if [ -f "$agent" ]; then
+        agent_name=$(basename "$agent")
+        cp "$agent" "''${DEST_DIR}/agents/$agent_name"
+      fi
+    done
+
+    echo "✓ Synced Claude templates to ''${DEST_DIR}"
   '';
 in
 {
