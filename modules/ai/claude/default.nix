@@ -1,25 +1,16 @@
 { lib, pkgs, shell, modules, ... }:
-let
-  sync_prompt = pkgs.writeShellScriptBin "sync_prompt" ''
-    SOURCE_FILE="${modules}/ai/claude/prompt/instructions.md"
-    DEST_DIR="''${PWD}/.claude"
-
-    mkdir -p "''${DEST_DIR}"
-    cp "''${SOURCE_FILE}" "''${DEST_DIR}/instructions.md"
-
-    echo "✓ Synced to ''${DEST_DIR}/instructions.md"
-  '';
-in
 {
- nixpkgs.config.allowUnfreePredicate = pkg:
+  nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "claude-code"
     ];
 
   home.packages = with pkgs; [
     claude-code
-    sync_prompt
   ];
+
+  home.file.".claude/CLAUDE.md".source = "${modules}/ai/claude/template/CLAUDE.md";
+  home.file.".claude/agents".source = "${modules}/ai/claude/template/agents";
 
   programs.${shell} = {
     shellAliases = {
