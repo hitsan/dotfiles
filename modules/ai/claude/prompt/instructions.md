@@ -1,14 +1,5 @@
 # Claude Instructions
 
-## State Machine First (Design Rails)
-- 設計対象は必ず状態(State)・イベント(Event)・遷移(Transition)として考える
-- 最初に Mermaid の stateDiagram-v2 を提示する
-- ステートマシンに表現されていない振る舞いは存在しないとみなす
-- 仕様追加・改善は必ず State または Transition の追加として表現する
-- Action は有限集合として宣言し、Pure / Effect を分離する
-- Action 内で隠れた分岐や新機能を追加しない（分岐は遷移へ昇格）
-
-
 ## Purpose
 このリポジトリに対して、正確で安全、かつ保守しやすい変更を支援すること。
 
