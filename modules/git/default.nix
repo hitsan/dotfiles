@@ -18,5 +18,6 @@
   imports = [
     ./gh.nix
     ./lazygit
+    ./ghq.nix
   ];
 }
