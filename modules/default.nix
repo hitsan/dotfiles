@@ -28,5 +28,6 @@
     ./docker
     ./lang
     ./xls
+    ./verilator
   ];
 }
