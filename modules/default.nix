@@ -23,6 +23,7 @@
     ./zellij
     ./neovim
     ./typst
+    ./marp
     ./git
     ./ai
     ./docker
