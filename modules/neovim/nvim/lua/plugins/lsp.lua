@@ -61,38 +61,43 @@ return {
         end,
       })
 
-      -- SystemVerilog LSP: verible-verilog-ls
-      local verible_filetypes = { "systemverilog", "verilog" }
+      -- Verilog LSP: verible-verilog-ls (for .v, .vh files)
       vim.lsp.config("verible", {
         cmd = { "verible-verilog-ls", "--rules_config_search" },
         on_attach = on_attach,
-        filetypes = verible_filetypes,
+        filetypes = { "verilog" },
         capabilities = capabilities,
         root_dir = vim.fs.root(0, { ".git", "verible.filelist" }),
       })
 
-      -- SystemVerilog LSP: svlangserver
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "verilog" },
+        callback = function(event)
+          local verible_config = vim.lsp.config["verible"]
+          if verible_config then
+            vim.lsp.start(verible_config, { bufnr = event.buf })
+          end
+        end,
+      })
+
+      -- SystemVerilog LSP: svlangserver (for .sv, .svh files)
       vim.lsp.config("svls", {
         cmd = { "svls" },
         on_attach = on_attach,
-        filetypes = verible_filetypes,
+        filetypes = { "systemverilog" },
         capabilities = capabilities,
         root_dir = vim.fs.root(0, { ".git" }),
         settings = {
           systemverilog = {
-            includeIndexing = { "**/*.{sv,svh,v,vh}" },
+            includeIndexing = { "**/*.{sv,svh}" },
           },
         },
       })
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = verible_filetypes,
+        pattern = { "systemverilog" },
         callback = function(event)
-          local verible_config = vim.lsp.config["verible"]
           local svls_config = vim.lsp.config["svls"]
-          if verible_config then
-            vim.lsp.start(verible_config, { bufnr = event.buf })
-          end
           if svls_config then
             vim.lsp.start(svls_config, { bufnr = event.buf })
           end
