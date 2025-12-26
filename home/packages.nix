@@ -2,6 +2,7 @@
 {
   home.packages = with pkgs; [
     bat
+    chromium
     eza
     jq
   ];
