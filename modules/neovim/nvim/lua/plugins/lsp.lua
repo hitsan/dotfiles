@@ -61,41 +61,36 @@ return {
         end,
       })
 
-      -- Verilog LSP: verible-verilog-ls (for .v, .vh files)
-      vim.lsp.config("verible", {
-        cmd = { "verible-verilog-ls", "--rules_config_search" },
-        on_attach = on_attach,
-        filetypes = { "verilog" },
-        capabilities = capabilities,
-        root_dir = vim.fs.root(0, { ".git", "verible.filelist" }),
-      })
-
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "verilog" },
-        callback = function(event)
-          local verible_config = vim.lsp.config["verible"]
-          if verible_config then
-            vim.lsp.start(verible_config, { bufnr = event.buf })
-          end
+      -- Ensure .sv and .svh files are recognized as SystemVerilog
+      vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+        pattern = { "*.sv", "*.svh" },
+        callback = function()
+          vim.bo.filetype = "systemverilog"
         end,
       })
 
-      -- SystemVerilog LSP: svlangserver (for .sv, .svh files)
+      -- SystemVerilog LSP: svls (supports both Verilog and SystemVerilog)
+      -- SystemVerilog is a superset of Verilog, so svls handles both
       vim.lsp.config("svls", {
         cmd = { "svls" },
         on_attach = on_attach,
-        filetypes = { "systemverilog" },
+        filetypes = { "verilog", "systemverilog" },
         capabilities = capabilities,
         root_dir = vim.fs.root(0, { ".git" }),
         settings = {
           systemverilog = {
-            includeIndexing = { "**/*.{sv,svh}" },
+            -- Enable SystemVerilog syntax (always_comb, etc.)
+            includeIndexing = { "**/*.{sv,svh,v,vh}" },
+            -- Disable Verilog-only linting rules
+            disableCompletionProvider = false,
+            disableHoverProvider = false,
+            disableSignatureHelpProvider = false,
           },
         },
       })
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "systemverilog" },
+        pattern = { "verilog", "systemverilog" },
         callback = function(event)
           local svls_config = vim.lsp.config["svls"]
           if svls_config then
