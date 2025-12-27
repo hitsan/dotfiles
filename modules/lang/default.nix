@@ -3,6 +3,6 @@
  home.packages = with pkgs; [
     gcc
     nodejs
-    uv
+    python3
   ];
 }
