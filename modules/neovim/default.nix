@@ -16,7 +16,6 @@
     tree-sitter
     nixd
     nixpkgs-fmt
-    verible
     svls
   ];
 }

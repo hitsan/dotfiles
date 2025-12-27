@@ -61,38 +61,38 @@ return {
         end,
       })
 
-      -- SystemVerilog LSP: verible-verilog-ls
-      local verible_filetypes = { "systemverilog", "verilog" }
-      vim.lsp.config("verible", {
-        cmd = { "verible-verilog-ls", "--rules_config_search" },
-        on_attach = on_attach,
-        filetypes = verible_filetypes,
-        capabilities = capabilities,
-        root_dir = vim.fs.root(0, { ".git", "verible.filelist" }),
+      -- Ensure .sv and .svh files are recognized as SystemVerilog
+      vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+        pattern = { "*.sv", "*.svh" },
+        callback = function()
+          vim.bo.filetype = "systemverilog"
+        end,
       })
 
-      -- SystemVerilog LSP: svlangserver
+      -- SystemVerilog LSP: svls (supports both Verilog and SystemVerilog)
+      -- SystemVerilog is a superset of Verilog, so svls handles both
       vim.lsp.config("svls", {
         cmd = { "svls" },
         on_attach = on_attach,
-        filetypes = verible_filetypes,
+        filetypes = { "verilog", "systemverilog" },
         capabilities = capabilities,
         root_dir = vim.fs.root(0, { ".git" }),
         settings = {
           systemverilog = {
+            -- Enable SystemVerilog syntax (always_comb, etc.)
             includeIndexing = { "**/*.{sv,svh,v,vh}" },
+            -- Disable Verilog-only linting rules
+            disableCompletionProvider = false,
+            disableHoverProvider = false,
+            disableSignatureHelpProvider = false,
           },
         },
       })
 
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = verible_filetypes,
+        pattern = { "verilog", "systemverilog" },
         callback = function(event)
-          local verible_config = vim.lsp.config["verible"]
           local svls_config = vim.lsp.config["svls"]
-          if verible_config then
-            vim.lsp.start(verible_config, { bufnr = event.buf })
-          end
           if svls_config then
             vim.lsp.start(svls_config, { bufnr = event.buf })
           end
