@@ -10,6 +10,7 @@
   home.packages = with pkgs; [
     devbox
     glow
+    gnumake
     just
   ];
   programs.${shell} = {
