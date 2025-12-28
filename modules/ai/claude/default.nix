@@ -11,6 +11,7 @@
 
   home.file.".claude/CLAUDE.md".source = "${modules}/ai/claude/template/CLAUDE.md";
   home.file.".claude/agents".source = "${modules}/ai/claude/template/agents";
+  home.file.".claude/commands".source = "${modules}/ai/claude/template/commands";
 
   programs.${shell} = {
     shellAliases = {
