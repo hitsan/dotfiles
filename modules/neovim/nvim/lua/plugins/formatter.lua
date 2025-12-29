@@ -16,6 +16,15 @@ return {
           json = { "prettier" },
           yaml = { "prettier" },
           markdown = { "prettier" },
+          systemverilog = { "verible_verilog_format" },
+          verilog = { "verible_verilog_format" },
+        },
+        formatters = {
+          verible_verilog_format = {
+            command = "verible-verilog-format",
+            args = { "-" },
+            stdin = true,
+          },
         },
         format_on_save = {
           timeout_ms = 1000,

@@ -17,5 +17,6 @@
     nixd
     nixpkgs-fmt
     svls
+    verible
   ];
 }
