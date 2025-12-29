@@ -28,6 +28,7 @@ require("lazy").setup({
   { import = "plugins.treesitter" },
   { import = "plugins.treesj" },
   { import = "plugins.formatter" },
+  { import = "plugins.lint" },
   { import = "plugins.neotree" },
   { import = "plugins.toggleterm" },
   { import = "plugins.which-key" },
