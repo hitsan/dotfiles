@@ -2,7 +2,7 @@
 {
   home.username = user;
   home.homeDirectory = home;
-  home.stateVersion = "25.05";
+  home.stateVersion = "26.05";
 
   home.file = { };
 
