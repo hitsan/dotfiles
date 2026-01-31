@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "gogcli": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769054654,
+        "narHash": "sha256-DXRw5jf/5fC8rgwLIy5m9qkxy3zQNrUpVG5C0RV7zKM=",
+        "owner": "steipete",
+        "repo": "gogcli",
+        "rev": "99d957581f61532de08f3847e79f639edad3c68b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "steipete",
+        "repo": "gogcli",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -38,6 +54,7 @@
     },
     "root": {
       "inputs": {
+        "gogcli": "gogcli",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"
       }

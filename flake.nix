@@ -7,9 +7,13 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    gogcli = {
+      url = "github:steipete/gogcli";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -23,7 +27,7 @@
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user email home shell modules; };
+      extraSpecialArgs = { inherit user email home shell modules inputs; };
 
       modules = [
         ./home/default.nix

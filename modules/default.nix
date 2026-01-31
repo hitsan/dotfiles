@@ -31,5 +31,6 @@
     ./lang
     ./xls
     ./verilator
+    ./gog
   ];
 }
