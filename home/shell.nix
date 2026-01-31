@@ -30,5 +30,6 @@
   
   home.sessionPath = [
     "${home}/.nix-profile/bin"
+    "${home}/.ilocal"
   ];
 }
