@@ -29,7 +29,6 @@
     ./ai
     ./docker
     ./lang
-    ./xls
     ./verilator
   ];
 }
