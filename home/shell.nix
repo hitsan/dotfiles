@@ -6,9 +6,6 @@
     syntaxHighlighting.enable = true;
 
     shellAliases = {
-      # Basic aliases
-      cat = "bat";
-      cd = "z";
       l = "eza";
       ll = "eza -l";
       lt = "eza -T";
