@@ -11,11 +11,5 @@
 
   home.file.".claude/CLAUDE.md".source = "${modules}/ai/claude/template/CLAUDE.md";
   home.file.".claude/agents".source = "${modules}/ai/claude/template/agents";
-  home.file.".claude/commands".source = "${modules}/ai/claude/template/commands";
-
-  programs.${shell} = {
-    shellAliases = {
-      serena = "claude mcp add serena -- uvx --from git+https://github.com/oraios/serena serena-mcp-server --context ide-assistant --project $(pwd)";
-      };
-  };
+  home.file.".claude/skills".source = "${modules}/ai/claude/template/skills";
 }
