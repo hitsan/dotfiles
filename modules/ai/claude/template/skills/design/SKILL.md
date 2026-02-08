@@ -142,6 +142,35 @@ arch と modeling の成果物を統合して提示：
 [実装ガイド]
 ```
 
+### Step 5: 設計ファイルの出力
+
+arch と modeling の成果物を別々のファイルに保存する。
+
+**出力ファイル:**
+1. `docs/design/機能名-architecture.md` - archスキルの成果物
+2. `docs/design/機能名-modeling.md` - modelingスキルの成果物（機能ごと）
+
+各スキルの出力フォーマットに従って保存（詳細は各スキルのSKILL.mdを参照）。
+
+**対話での出力:**
+すべてのファイルを保存した後、統合概要を表示:
+```
+✓ 設計完了
+
+アーキテクチャ: docs/design/[プロジェクト名]-architecture.md
+モデリング:
+  - docs/design/[機能1名]-modeling.md
+  - docs/design/[機能2名]-modeling.md
+
+## 概要
+[プロジェクト/機能の簡潔な説明]
+- アーキテクチャパターン: [パターン名]
+- 設計した機能数: N
+- 主要な設計手法: [データフロー/ステートマシン/複合]
+
+詳細は上記ファイルをご確認ください。
+```
+
 ## Important Notes
 
 - **段階的な実行**: archとmodelingを明確に分離して実行し、各段階の成果を確認

@@ -155,6 +155,57 @@ Use these templates as starting points and customize for specific projects.
 
 ## Output Format
 
+### Design File Output
+
+Save the architecture design to a Markdown file.
+
+**Output path:** `docs/design/機能名-architecture.md`
+
+**File content:**
+```markdown
+# [機能名] - アーキテクチャ設計
+
+## 機能概要
+[機能の目的と概要]
+
+## アーキテクチャパターン
+[選択されたパターンと理由]
+
+## アーキテクチャ図
+```mermaid
+[Step 3で作成したMermaidアーキテクチャ図]
+```
+
+## ディレクトリ構造
+[Step 3で定義したプロジェクト構造]
+
+## コンポーネント説明
+| コンポーネント | 役割 |
+|---------------|------|
+[主要なコンポーネントとその役割を表形式で]
+
+## 実装時の考慮事項
+[Step 3で整理した実装ガイドライン（重要なポイントのみ）]
+```
+
+**Conversation output:**
+After saving the design file, display only a summary:
+```
+✓ 設計完了
+
+機能: [機能名]
+ファイル: docs/design/[機能名]-architecture.md
+
+## 概要
+[機能の簡潔な説明]
+- パターン: [選択されたアーキテクチャパターン]
+- 主要コンポーネント数: N
+
+詳細は上記ファイルをご確認ください。
+```
+
+### Legacy Output Format (for reference)
+
 Provide architecture design as:
 1. **Overview**: Chosen pattern(s) and rationale
 2. **Architecture diagram**: ASCII or Mermaid visualization
