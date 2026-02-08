@@ -188,20 +188,13 @@ Save the architecture design to a Markdown file.
 [Step 3で整理した実装ガイドライン（重要なポイントのみ）]
 ```
 
-**Conversation output:**
-After saving the design file, display only a summary:
+**Conversation output (500字以内):**
 ```
-✓ 設計完了
+✓ 設計完了: [機能名]
 
-機能: [機能名]
-ファイル: docs/design/[機能名]-architecture.md
+出力: docs/design/[機能名]-architecture.md
 
-## 概要
-[機能の簡潔な説明]
-- パターン: [選択されたアーキテクチャパターン]
-- 主要コンポーネント数: N
-
-詳細は上記ファイルをご確認ください。
+[2-3文での機能概要、選択したパターン、主要コンポーネントの簡潔な説明]
 ```
 
 ### Legacy Output Format (for reference)
