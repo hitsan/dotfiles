@@ -17,6 +17,7 @@
     initContent = ''
       PS1='%F{green}$%f '
       setopt no_beep
+
     '';
 
     dotDir = "${home}/.config/zsh";

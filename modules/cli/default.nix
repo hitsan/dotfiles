@@ -11,11 +11,17 @@
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
+    pay-respects.enable = true;
 
-    ${shell}.shellAliases = {
-      l = "eza";
-      ll = "eza -l";
-      lt = "eza -T";
+    ${shell} = {
+      initContent = ''
+        eval "$(pay-respects zsh --alias f)"
+      '';
+      shellAliases = {
+        l = "eza";
+        ll = "eza -l";
+        lt = "eza -T";
+      };
     };
   };
 }
