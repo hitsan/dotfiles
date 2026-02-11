@@ -33,5 +33,6 @@
     ./cli
     ./browser
     ./yazi
+    ./navi
   ];
 }

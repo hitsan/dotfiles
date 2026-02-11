@@ -10,6 +10,7 @@
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
+
     ${shell}.shellAliases = {
       l = "eza";
       ll = "eza -l";
