@@ -30,5 +30,8 @@
     ./docker
     ./lang
     ./verilator
+    ./cli
+    ./browser
+    ./yazi
   ];
 }

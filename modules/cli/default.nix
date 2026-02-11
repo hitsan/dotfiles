@@ -1,8 +1,7 @@
-{ pkgs, shell, ... }:
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     bat
-    chromium
     eza
     jq
   ];
@@ -11,11 +10,5 @@
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
-    yazi.enable = true;
-  };
-  programs.${shell} = {
-    shellAliases = {
-      yz = "yazi";
-    };
   };
 }

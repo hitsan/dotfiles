@@ -26,7 +26,6 @@
   
   services.ssh-agent.enable = true;
   imports = [
-    ./packages.nix
     ./shell.nix
   ];
 }
