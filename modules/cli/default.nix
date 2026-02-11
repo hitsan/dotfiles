@@ -1,6 +1,7 @@
 { pkgs, shell, ... }:
 {
   home.packages = with pkgs; [
+    act
     bat
     eza
     jq
