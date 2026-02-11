@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, shell, ... }:
 {
   home.packages = with pkgs; [
     bat
@@ -10,5 +10,10 @@
     fzf.enable = true;
     zoxide.enable = true;
     ripgrep.enable = true;
+    ${shell}.shellAliases = {
+      l = "eza";
+      ll = "eza -l";
+      lt = "eza -T";
+    };
   };
 }

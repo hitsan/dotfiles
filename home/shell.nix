@@ -6,9 +6,6 @@
     syntaxHighlighting.enable = true;
 
     shellAliases = {
-      l = "eza";
-      ll = "eza -l";
-      lt = "eza -T";
       home = "home-manager switch --flake ~/dotfiles#${user}";
       hflake = "home-manager switch --flake ~/dotfiles#${user}";
       
