@@ -4,6 +4,7 @@
     bat
     eza
     jq
+    vhs
   ];
   programs = {
     fd.enable = true;
