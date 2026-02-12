@@ -5,6 +5,7 @@
     bat
     eza
     jq
+    termscp
     vhs
   ];
   programs = {
