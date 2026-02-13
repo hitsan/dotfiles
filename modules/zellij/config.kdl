@@ -7,7 +7,7 @@ keybinds clear-defaults=true {
         bind "Ctrl g" { SwitchToMode "normal"; }
     }
     normal {
-        bind "Ctrl a" { "FocusNextPane"; }
+        bind "Ctrl a" { ToggleFocusFullscreen; }
         bind "Ctrl y" { "GoToNextTab"; }
     }
     pane {
