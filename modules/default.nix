@@ -20,16 +20,12 @@
   };
 
   imports = [
-    ./shell
     ./zellij
     ./neovim
-    ./typst
-    ./marp
     ./git
     ./ai
     ./docker
     ./lang
-    ./verilator
     ./cli
     ./browser
     ./yazi
