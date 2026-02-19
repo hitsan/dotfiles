@@ -11,7 +11,6 @@
     recursive = true;
   };
   home.packages = with pkgs; [
-    rust-analyzer
     gopls
     tree-sitter
     nixd

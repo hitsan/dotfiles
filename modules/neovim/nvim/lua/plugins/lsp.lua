@@ -16,6 +16,7 @@ return {
       end
 
       vim.lsp.config("rust_analyzer", {
+        cmd = { vim.fn.exepath("rust-analyzer") },
         handlers = {
           ["textDocument/signatureHelp"] = function() end,
         },
@@ -24,9 +25,7 @@ return {
             cargo = {
               allFeatures = false,
             },
-            checkOnSave = {
-              command = "clippy",
-            },
+            checkOnSave = false,
             procMacro = {
               enable = false,
             },
@@ -99,10 +98,11 @@ return {
         end,
       })
 
-      vim.lsp.enable({
-        "rust_analyzer",
-        "nixd",
-      })
+      local servers_to_enable = { "nixd" }
+      if vim.fn.executable("cargo") == 1 then
+        table.insert(servers_to_enable, "rust_analyzer")
+      end
+      vim.lsp.enable(servers_to_enable)
     end,
   },
 }
