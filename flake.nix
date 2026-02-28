@@ -7,9 +7,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-openclaw.url = "github:openclaw/nix-openclaw";
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs = { self, nixpkgs, home-manager, nix-openclaw }:
   let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -19,11 +20,12 @@
     root = builtins.toString ./.;
     modules = "${root}/modules";
     shell = "zsh";
+    openclaw = nix-openclaw.packages.${system}.openclaw;
   in
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user email home shell modules; };
+      extraSpecialArgs = { inherit user email home shell modules openclaw; };
 
       modules = [
         ./home/default.nix
