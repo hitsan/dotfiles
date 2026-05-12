@@ -15,7 +15,6 @@ return {
           typescript = { "prettier" },
           json = { "prettier" },
           yaml = { "prettier" },
-          markdown = { "prettier" },
           systemverilog = { "verible_verilog_format" },
           verilog = { "verible_verilog_format" },
         },
