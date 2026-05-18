@@ -1,43 +1,79 @@
 # dotfiles
 
-Nix Flakes + Home Manager で管理する dotfiles リポジトリ（x86_64-linux / WSL2）。
+Nix Flakes + Home Manager で管理する dotfiles（x86_64-linux / WSL2）。
 
-## ディレクトリ構成
-
-```
-.
-├── flake.nix              # エントリポイント（nixpkgs-unstable, home-manager）
-├── flake.lock
-├── home/
-│   ├── default.nix        # ユーザー設定（username, EDITOR, ssh）
-│   └── shell.nix          # シェル共通設定（zsh aliases）
-└── modules/
-    ├── default.nix        # 全モジュールの import 集約
-    ├── ai/                # AI ツール（claude, coderabbit, codex, gemini）
-    ├── browser/           # ブラウザ
-    ├── cli/               # CLI ユーティリティ
-    ├── docker/            # Docker
-    ├── git/               # git, gh, ghq, lazygit
-    ├── lang/              # プログラミング言語
-    ├── marp/              # Marp（スライド）
-    ├── navi/              # navi（チートシート）
-    ├── neovim/            # Neovim + Lua プラグイン設定
-    │   └── nvim/          #   init.lua, lua/base.lua, lua/plugins/
-    ├── shell/             # シェル・ターミナル（alacritty）
-    ├── typst/             # Typst（組版）
-    ├── verilator/         # Verilator（HDL シミュレータ）
-    ├── yazi/              # yazi（ファイルマネージャ）
-    └── zellij/            # Zellij（ターミナルマルチプレクサ）
-```
-
-## 適用方法
+## 主要コマンド
 
 ```sh
+# 設定を適用
 home-manager switch --flake .
+
+# ビルドのみ（適用しない）
+home-manager build --flake .
+
+# flake の更新
+nix flake update
 ```
 
-## 変更時の注意
+## アーキテクチャ
 
-- 各 `modules/<name>/default.nix` が Home Manager モジュール単位
-- `flake.nix` の `extraSpecialArgs` で `user`, `email`, `home`, `shell`, `modules` を各モジュールに渡している
-- シェルは `zsh` がデフォルト
+### inputs
+| input | 用途 |
+|-------|------|
+| `nixpkgs-unstable` | パッケージ |
+| `home-manager` | ユーザー設定管理 |
+| `nix-openclaw` | openclaw パッケージ |
+
+### extraSpecialArgs（全モジュールで利用可能）
+| 変数 | 値 |
+|------|-----|
+| `user` | `hitsan` |
+| `email` | GitHub noreply アドレス |
+| `home` | `/home/hitsan` |
+| `shell` | `zsh` |
+| `modules` | モジュールディレクトリのパス |
+| `openclaw` | openclaw パッケージ |
+
+### モジュール構成
+```
+home/default.nix   # ユーザー設定（username, stateVersion, EDITOR, ssh）
+home/shell.nix     # zsh エイリアス
+modules/default.nix  # 全モジュールを import + direnv, devbox, glow, make, just
+modules/<name>/    # 各ツールの設定（下記参照）
+```
+
+## モジュール一覧
+
+| ディレクトリ | 内容 |
+|-------------|------|
+| `ai/` | claude, coderabbit, codex, gemini |
+| `browser/` | ブラウザ |
+| `cli/` | CLI ユーティリティ |
+| `docker/` | Docker |
+| `git/` | git, gh, ghq, lazygit |
+| `lang/` | プログラミング言語 |
+| `navi/` | navi チートシート |
+| `neovim/` | Neovim + Lua プラグイン |
+| `yazi/` | ファイルマネージャ |
+| `zellij/` | ターミナルマルチプレクサ |
+
+## 新モジュールを追加するとき
+
+1. `modules/<name>/default.nix` を作成
+2. `modules/default.nix` の `imports` に `./name` を追加
+3. モジュール引数に必要な `extraSpecialArgs` 変数を宣言する
+
+```nix
+# modules/<name>/default.nix のテンプレート
+{ pkgs, shell, ... }:
+{
+  home.packages = with pkgs; [ ... ];
+  programs.${shell}.shellAliases = { ... };
+}
+```
+
+## 注意点
+
+- `home.stateVersion` は変更しない（Home Manager の互換性に影響）
+- パッケージ追加は `home.packages` より `programs.<name>.enable` を優先する
+- `shell` 変数を使って `programs.${shell}` に設定を書くとシェル非依存になる
