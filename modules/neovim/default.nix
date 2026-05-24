@@ -16,5 +16,7 @@
     nixd
     nixpkgs-fmt
     svls
+    typescript-language-server
+    vscode-langservers-extracted
   ];
 }

@@ -98,11 +98,21 @@ return {
         end,
       })
 
-      local servers_to_enable = { "nixd" }
+      local servers_to_enable = { "nixd", "ts_ls", "eslint" }
       if vim.fn.executable("cargo") == 1 then
         table.insert(servers_to_enable, "rust_analyzer")
       end
       vim.lsp.enable(servers_to_enable)
+
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+        callback = function()
+          vim.lsp.buf.code_action({
+            context = { only = { "source.fixAll.eslint" } },
+            apply = true,
+          })
+        end,
+      })
     end,
   },
 }
