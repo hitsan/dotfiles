@@ -1,8 +1,8 @@
 layout {
     pane size=1 borderless=true {
         plugin location="compact-bar" {
-            format_left  "{mode}"
-            format_center "{tabs}"
+            format_left  "{mode}{tabs}"
+            format_center ""
             format_right ""
             format_space ""
 
@@ -17,8 +17,8 @@ layout {
             mode_search  "#[bg=red] SEARCH "
             mode_tmux    "#[bg=magenta] TMUX "
 
-            tab_normal   "#[fg=grey] {name} "
-            tab_active   "#[fg=white,bold] {name} "
+            tab_normal   "#[bg=black,fg=white] {name} "
+            tab_active   "#[bg=green,fg=black,bold] {name} "
         }
     }
     pane
