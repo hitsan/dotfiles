@@ -1,0 +1,25 @@
+layout {
+    pane size=1 borderless=true {
+        plugin location="compact-bar" {
+            format_left  "{mode}"
+            format_center "{tabs}"
+            format_right ""
+            format_space ""
+
+            mode_normal  "#[bg=blue] NORMAL "
+            mode_locked  "#[bg=white,fg=black] LOCKED "
+            mode_pane    "#[bg=green] PANE "
+            mode_tab     "#[bg=yellow,fg=black] TAB "
+            mode_resize  "#[bg=cyan,fg=black] RESIZE "
+            mode_move    "#[bg=magenta] MOVE "
+            mode_scroll  "#[bg=red] SCROLL "
+            mode_session "#[bg=blue] SESSION "
+            mode_search  "#[bg=red] SEARCH "
+            mode_tmux    "#[bg=magenta] TMUX "
+
+            tab_normal   "#[fg=grey] {name} "
+            tab_active   "#[fg=white,bold] {name} "
+        }
+    }
+    pane
+}
