@@ -3,7 +3,7 @@ layout {
         plugin location="compact-bar" {
             format_left  "{mode} {tabs}"
             format_center ""
-            format_right "{pipe_status} {notifications}"
+            format_right ""
             format_space "#[bg=#2e3440]"
 
             mode_normal  "#[fg=#88c0d0,bg=#2e3440]#[fg=#2e3440,bg=#88c0d0,bold] NORMAL #[fg=#88c0d0,bg=#2e3440]"
@@ -19,13 +19,6 @@ layout {
 
             tab_normal   "#[fg=#2e3440,bg=#3b4252]#[fg=#d8dee9,bg=#3b4252] {name} #[fg=#3b4252,bg=#2e3440]"
             tab_active   "#[fg=#2e3440,bg=#88c0d0,bold]#[fg=#2e3440,bg=#88c0d0,bold] {name} #[fg=#88c0d0,bg=#2e3440]"
-
-            pipe_status_format "#[fg=#4c566a,bg=#2e3440]│ {output}"
-            pipe_status_rendermode "dynamic"
-
-            notifications_format_unread "#[fg=#bf616a,bg=#2e3440,bold] {message} "
-            notifications_format_no_notifications ""
-            notifications_show_interval "10"
         }
     }
     pane
