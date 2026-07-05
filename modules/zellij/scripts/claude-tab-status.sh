@@ -27,11 +27,16 @@ if [ ${#PROJECT_NAME} -gt 12 ]; then
     PROJECT_NAME="${PROJECT_NAME:0:6}..."
 fi
 
-TAB_ID=$(zellij -s "$ZELLIJ_SESSION_NAME" action list-panes -t -j 2>/dev/null \
-    | jq -r --arg id "$PANE_ID" '[.[] | select(.is_plugin==false and (.id|tostring)==$id)][0].tab_id // empty')
+PANES_JSON=$(zellij -s "$ZELLIJ_SESSION_NAME" action list-panes -t -j 2>/dev/null)
+TAB_ID=$(echo "$PANES_JSON" | jq -r --arg id "$PANE_ID" '[.[] | select(.is_plugin==false and (.id|tostring)==$id)][0].tab_id // empty')
 [ -z "$TAB_ID" ] && exit 0
 
+# Panes that no longer exist (killed/crashed without a SessionEnd hook) get
+# pruned from the state file whenever another pane in the same tab fires.
+ALIVE_IDS_JSON=$(echo "$PANES_JSON" | jq -c '[.[] | select(.is_plugin==false) | (.id|tostring)]')
+
 STATE_FILE="${STATE_DIR}/tab-${TAB_ID}.json"
+LOCK_FILE="${STATE_FILE}.lock"
 [ -f "$STATE_FILE" ] || echo "{}" > "$STATE_FILE"
 
 # Re-render the tab name from every pane's current icon in this tab.
@@ -47,9 +52,12 @@ render_tab() {
 }
 
 if [ "$HOOK_EVENT" = "SessionEnd" ]; then
-    TMP_FILE=$(mktemp)
-    jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
-    render_tab
+    (
+        flock -x 200
+        TMP_FILE=$(mktemp)
+        jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
+        render_tab
+    ) 200>"$LOCK_FILE"
     exit 0
 fi
 
@@ -66,16 +74,25 @@ case "$HOOK_EVENT" in
         esac
         ;;
     PostToolUse)        ICON="◐" ;;
-    Notification)       ICON="🔔" ;;
+    Notification)
+        NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
+        case "$NOTIF_TYPE" in
+            permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input) ICON="🔴" ;;
+            *)                                                                 ICON="🔔" ;;
+        esac
+        ;;
     PermissionRequest)  ICON="🔴" ;;
     Stop)               ICON="✅" ;;
     SubagentStop)       ICON="▷" ;;
     *) exit 0 ;;
 esac
 
-TMP_FILE=$(mktemp)
-jq --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$(date +%s)" \
-    '.[$pane] = {icon: $icon, project: $project, ts: ($ts | tonumber)}' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
-    && mv "$TMP_FILE" "$STATE_FILE"
-
-render_tab
+(
+    flock -x 200
+    TMP_FILE=$(mktemp)
+    jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$(date +%s)" \
+        'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: ($ts | tonumber)}' \
+        "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
+        && mv "$TMP_FILE" "$STATE_FILE"
+    render_tab
+) 200>"$LOCK_FILE"
