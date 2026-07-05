@@ -17,8 +17,10 @@ layout {
             mode_search  "#[fg=#bf616a,bg=#2e3440]#[fg=#2e3440,bg=#bf616a,bold] SEARCH #[fg=#bf616a,bg=#2e3440]"
             mode_tmux    "#[fg=#b48ead,bg=#2e3440]#[fg=#2e3440,bg=#b48ead,bold] TMUX #[fg=#b48ead,bg=#2e3440]"
 
-            tab_normal   "#[fg=#2e3440,bg=#3b4252]#[fg=#d8dee9,bg=#3b4252] {name} #[fg=#3b4252,bg=#2e3440]"
-            tab_active   "#[fg=#2e3440,bg=#88c0d0,bold]#[fg=#2e3440,bg=#88c0d0,bold] {name} #[fg=#88c0d0,bg=#2e3440]"
+            tab_normal   "#[fg=#2e3440,bg=#3b4252]#[fg=#d8dee9,bg=#3b4252] {name}{fullscreen_indicator} #[fg=#3b4252,bg=#2e3440]"
+            tab_active   "#[fg=#2e3440,bg=#88c0d0,bold]#[fg=#2e3440,bg=#88c0d0,bold] {name}{fullscreen_indicator} #[fg=#88c0d0,bg=#2e3440]"
+
+            tab_fullscreen_indicator " ⛶"
         }
     }
     pane
