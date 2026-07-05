@@ -37,4 +37,8 @@
   };
   home.file.".config/zellij/config.kdl".source = "${modules}/zellij/config.kdl";
   home.file.".config/zellij/layouts/compact.kdl".source = "${modules}/zellij/layouts/compact.kdl";
+  home.file.".config/zellij/scripts/claude-tab-status.sh" = {
+    source = "${modules}/zellij/scripts/claude-tab-status.sh";
+    executable = true;
+  };
 }
