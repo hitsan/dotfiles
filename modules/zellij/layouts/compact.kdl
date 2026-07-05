@@ -1,9 +1,9 @@
 layout {
     pane size=1 borderless=true {
         plugin location="compact-bar" {
-            format_left  "{mode} {tabs}"
+            format_left  "{tabs}"
             format_center ""
-            format_right ""
+            format_right "{mode}"
             format_space "#[bg=#2e3440]"
 
             mode_normal  "#[fg=#88c0d0,bg=#2e3440]#[fg=#2e3440,bg=#88c0d0,bold] NORMAL #[fg=#88c0d0,bg=#2e3440]"
