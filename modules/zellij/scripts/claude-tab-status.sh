@@ -74,6 +74,7 @@ case "$HOOK_EVENT" in
         esac
         ;;
     PostToolUse)        ICON="◐" ;;
+    PostToolUseFailure) ICON="✗" ;;
     Notification)
         NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
         case "$NOTIF_TYPE" in
