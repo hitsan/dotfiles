@@ -11,6 +11,12 @@
 STATE_DIR="/tmp/claude-tab-status"
 mkdir -p "$STATE_DIR"
 
+# The four tab states. Named so a glyph change is one edit, not a scatter.
+ICON_NEEDS_USER="🔔"  # waiting on the user (permission / input)
+ICON_BUSY="⏳"         # Claude is working
+ICON_FAILED="✗"        # a tool call failed
+ICON_DONE="✅"         # Claude finished; user's turn
+
 # Re-render the tab name from every pane's current icon in this tab.
 render_tab() {
     local composite project
@@ -32,12 +38,12 @@ render_tab() {
 # answered it), instead of guessing on a blind timer. It bails out
 # whenever another event has already updated this pane's entry (checked
 # via the ts token, so a newer prompt or completion is never clobbered).
-if [ "${1:-}" = "__red-watch" ]; then
+if [ "${1:-}" = "__watch" ]; then
     shift
     # Positional args must match the spawn site at the bottom of this file.
     PANE_ID="$1" STATE_FILE="$2" ORIG_TS="$3" LOCK_FILE="$4" ZELLIJ_SESSION_NAME="$5" TAB_ID="$6"
-    POLL_INTERVAL_SEC="${RED_WATCH_POLL_INTERVAL_SEC:-1}"
-    MAX_POLLS="${RED_WATCH_MAX_POLLS:-60}"
+    POLL_INTERVAL_SEC="${WATCH_POLL_INTERVAL_SEC:-1}"
+    MAX_POLLS="${WATCH_MAX_POLLS:-60}"
     DUMP_FILE=$(mktemp)
     i=0
     while [ "$i" -lt "$MAX_POLLS" ]; do
@@ -49,13 +55,14 @@ if [ "${1:-}" = "__red-watch" ]; then
             i=$((i + 1))
             continue
         fi
+        # '.' matches the apostrophe variants in "don't ask again".
         if ! grep -qE "Do you want to|No, and tell Claude|don.t ask again" "$DUMP_FILE" 2>/dev/null; then
             (
                 flock -x 200
                 CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
                 if [ "$CURRENT_TS" = "$ORIG_TS" ]; then
                     TMP_FILE=$(mktemp)
-                    jq --arg pane "$PANE_ID" '.[$pane].icon = "⏳"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
+                    jq --arg pane "$PANE_ID" --arg icon "$ICON_BUSY" '.[$pane].icon = $icon' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
                     render_tab
                 fi
             ) 200>"$LOCK_FILE"
@@ -105,19 +112,18 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
     exit 0
 fi
 
-# Four states: 🔔 needs the user, ⏳ busy, ✗ tool failed, ✅ user's turn.
 case "$HOOK_EVENT" in
-    UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="⏳" ;;
-    PostToolUseFailure) ICON="✗" ;;
+    UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="$ICON_BUSY" ;;
+    PostToolUseFailure) ICON="$ICON_FAILED" ;;
     Notification)
         NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
         case "$NOTIF_TYPE" in
-            permission_prompt|elicitation_dialog|agent_needs_input) ICON="🔔" ;;
+            permission_prompt|elicitation_dialog|agent_needs_input) ICON="$ICON_NEEDS_USER" ;;
             *) exit 0 ;;
         esac
         ;;
-    PermissionRequest)  ICON="🔔" ;;
-    Stop)               ICON="✅" ;;
+    PermissionRequest)  ICON="$ICON_NEEDS_USER" ;;
+    Stop)               ICON="$ICON_DONE" ;;
     *) exit 0 ;;
 esac
 
@@ -132,14 +138,14 @@ TS=$(date +%s%N)
     render_tab
 ) 200>"$LOCK_FILE"
 
-if [ "$ICON" = "🔔" ]; then
+if [ "$ICON" = "$ICON_NEEDS_USER" ]; then
     WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
-    # A prior 🔔 event may still have its watcher running; kill it before
-    # starting a new one so only one watcher per pane polls at a time.
+    # A prior needs-user event may still have its watcher running; kill it
+    # before starting a new one so only one watcher per pane polls at a time.
     OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
     [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
-    # Arg order must match the __red-watch handler at the top of this file.
-    setsid "$0" __red-watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
+    # Arg order must match the __watch handler at the top of this file.
+    setsid "$0" __watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
         </dev/null >/dev/null 2>&1 &
     echo "$!" > "$WATCH_PID_FILE"
     disown
