@@ -55,7 +55,7 @@ if [ "${1:-}" = "__red-watch" ]; then
                 CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
                 if [ "$CURRENT_TS" = "$ORIG_TS" ]; then
                     TMP_FILE=$(mktemp)
-                    jq --arg pane "$PANE_ID" '.[$pane].icon = "⏳"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
+                    jq --arg pane "$PANE_ID" '.[$pane].icon = "◐"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
                     render_tab
                 fi
             ) 200>"$LOCK_FILE"
@@ -73,7 +73,6 @@ PANE_ID="${ZELLIJ_PANE_ID:-}"
 
 INPUT=$(cat)
 HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // ""' 2>/dev/null)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null)
 CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null)
 
 [ -z "$HOOK_EVENT" ] && exit 0
@@ -106,30 +105,19 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
     exit 0
 fi
 
+# Four states: 🔴 needs the user, ◐ busy, ✗ tool failed, ✅ user's turn.
 case "$HOOK_EVENT" in
-    UserPromptSubmit)  ICON="▶" ;;
-    PreToolUse)
-        case "$TOOL_NAME" in
-            Bash)               ICON="⚡" ;;
-            Read|Glob|Grep)     ICON="🔍" ;;
-            Write|Edit)         ICON="✎" ;;
-            WebSearch|WebFetch) ICON="🌐" ;;
-            Task)               ICON="🤖" ;;
-            *)                  ICON="⏳" ;;
-        esac
-        ;;
-    PostToolUse)        ICON="◐" ;;
+    UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="◐" ;;
     PostToolUseFailure) ICON="✗" ;;
     Notification)
         NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
         case "$NOTIF_TYPE" in
             permission_prompt|elicitation_dialog|agent_needs_input) ICON="🔴" ;;
-            *)                                                                 ICON="🔔" ;;
+            *) exit 0 ;;
         esac
         ;;
     PermissionRequest)  ICON="🔴" ;;
     Stop)               ICON="✅" ;;
-    SubagentStop)       ICON="▷" ;;
     *) exit 0 ;;
 esac
 
