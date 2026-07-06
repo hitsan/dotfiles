@@ -19,5 +19,6 @@
     ./gh.nix
     ./lazygit
     ./ghq.nix
+    ./worktrunk.nix
   ];
 }
