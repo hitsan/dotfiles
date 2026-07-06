@@ -93,6 +93,10 @@ keybinds clear-defaults=true {
         bind "e" { EditScrollback; SwitchToMode "normal"; }
         bind "s" { SwitchToMode "entersearch"; SearchInput 0; }
     }
+    // "tmux" is an unused built-in mode name repurposed for the keybind hint display; unrelated to tmux itself
+    tmux {
+        bind "Ctrl k" { SwitchToMode "normal"; }
+    }
     search {
         bind "c" { SearchToggleOption "CaseSensitivity"; }
         bind "n" { Search "down"; }
@@ -185,6 +189,9 @@ keybinds clear-defaults=true {
     }
     shared_except "locked" "scroll" "search" {
         bind "Ctrl s" { SwitchToMode "scroll"; }
+    }
+    shared_except "locked" "tmux" {
+        bind "Ctrl k" { SwitchToMode "tmux"; }
     }
     shared_except "locked" "tab" {
         bind "Ctrl t" { SwitchToMode "tab"; }
