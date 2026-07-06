@@ -77,7 +77,7 @@ case "$HOOK_EVENT" in
     Notification)
         NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
         case "$NOTIF_TYPE" in
-            permission_prompt|idle_prompt|elicitation_dialog|agent_needs_input) ICON="🔴" ;;
+            permission_prompt|elicitation_dialog|agent_needs_input) ICON="🔴" ;;
             *)                                                                 ICON="🔔" ;;
         esac
         ;;
