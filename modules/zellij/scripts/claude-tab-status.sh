@@ -90,7 +90,7 @@ TAB_ID=$(echo "$PANES_JSON" | jq -r --arg id "$PANE_ID" '[.[] | select(.is_plugi
 # pruned from the state file whenever another pane in the same tab fires.
 ALIVE_IDS_JSON=$(echo "$PANES_JSON" | jq -c '[.[] | select(.is_plugin==false) | (.id|tostring)]')
 
-STATE_FILE="${STATE_DIR}/tab-${TAB_ID}.json"
+STATE_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-tab-${TAB_ID}.json"
 LOCK_FILE="${STATE_FILE}.lock"
 [ -f "$STATE_FILE" ] || echo "{}" > "$STATE_FILE"
 
@@ -101,7 +101,7 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
         jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
         render_tab
     ) 200>"$LOCK_FILE"
-    rm -f "${STATE_DIR}/watch-${PANE_ID}.pid"
+    rm -f "${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
     exit 0
 fi
 
@@ -144,7 +144,7 @@ TS=$(date +%s%N)
 ) 200>"$LOCK_FILE"
 
 if [ "$ICON" = "🔴" ]; then
-    WATCH_PID_FILE="${STATE_DIR}/watch-${PANE_ID}.pid"
+    WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
     # A prior 🔴 event may still have its watcher running; kill it before
     # starting a new one so only one watcher per pane polls at a time.
     OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
