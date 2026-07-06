@@ -99,6 +99,7 @@ ALIVE_IDS_JSON=$(echo "$PANES_JSON" | jq -c '[.[] | select(.is_plugin==false) | 
 
 STATE_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-tab-${TAB_ID}.json"
 LOCK_FILE="${STATE_FILE}.lock"
+WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
 [ -f "$STATE_FILE" ] || echo "{}" > "$STATE_FILE"
 
 if [ "$HOOK_EVENT" = "SessionEnd" ]; then
@@ -108,7 +109,7 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
         jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
         render_tab
     ) 200>"$LOCK_FILE"
-    rm -f "${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
+    rm -f "$WATCH_PID_FILE"
     exit 0
 fi
 
@@ -139,7 +140,6 @@ TS=$(date +%s%N)
 ) 200>"$LOCK_FILE"
 
 if [ "$ICON" = "$ICON_NEEDS_USER" ]; then
-    WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
     # A prior needs-user event may still have its watcher running; kill it
     # before starting a new one so only one watcher per pane polls at a time.
     OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
