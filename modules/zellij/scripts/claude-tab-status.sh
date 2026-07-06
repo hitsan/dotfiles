@@ -34,6 +34,7 @@ render_tab() {
 # via the ts token, so a newer prompt or completion is never clobbered).
 if [ "${1:-}" = "__red-watch" ]; then
     shift
+    # Positional args must match the spawn site at the bottom of this file.
     PANE_ID="$1" STATE_FILE="$2" ORIG_TS="$3" LOCK_FILE="$4" ZELLIJ_SESSION_NAME="$5" TAB_ID="$6"
     POLL_INTERVAL_SEC="${RED_WATCH_POLL_INTERVAL_SEC:-1}"
     MAX_POLLS="${RED_WATCH_MAX_POLLS:-60}"
@@ -44,7 +45,7 @@ if [ "${1:-}" = "__red-watch" ]; then
         CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
         [ "$CURRENT_TS" = "$ORIG_TS" ] || break
         if ! zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null; then
-            # dump失敗をダイアログ消失と誤判定しないよう、この周回は判定せず次へ進む
+            # Don't treat a dump failure as the dialog being gone; skip this round.
             i=$((i + 1))
             continue
         fi
@@ -149,6 +150,7 @@ if [ "$ICON" = "🔴" ]; then
     # starting a new one so only one watcher per pane polls at a time.
     OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
     [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
+    # Arg order must match the __red-watch handler at the top of this file.
     setsid "$0" __red-watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
         </dev/null >/dev/null 2>&1 &
     echo "$!" > "$WATCH_PID_FILE"
