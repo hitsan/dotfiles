@@ -8,12 +8,63 @@
 # Resolves pane_id -> tab_id via `list-panes -t` so the correct tab is
 # targeted even when it isn't the currently focused one.
 
+STATE_DIR="/tmp/claude-tab-status"
+mkdir -p "$STATE_DIR"
+
+# Re-render the tab name from every pane's current icon in this tab.
+render_tab() {
+    local composite project
+    composite=$(jq -r '[to_entries | sort_by(.key | tonumber)[] | .value.icon] | join("|")' "$STATE_FILE" 2>/dev/null)
+    project=$(jq -r '(to_entries | sort_by(.key | tonumber))[0].value.project // empty' "$STATE_FILE" 2>/dev/null)
+    if [ -z "$composite" ]; then
+        zellij -s "$ZELLIJ_SESSION_NAME" action rename-tab -t "$TAB_ID" "$PROJECT_NAME" 2>/dev/null || true
+    else
+        zellij -s "$ZELLIJ_SESSION_NAME" action rename-tab -t "$TAB_ID" "${composite} ${project}" 2>/dev/null || true
+    fi
+}
+
+# There is no hook event for "permission granted, tool execution resumed" —
+# once a permission prompt sets 🔴, the next event is PostToolUse at
+# completion, so a long-running approved tool leaves 🔴 shown the whole
+# time. This worker (spawned detached, see bottom of file) polls the
+# pane's own screen content for the permission-dialog text and switches to
+# a generic busy icon as soon as the dialog is gone (i.e. the user
+# answered it), instead of guessing on a blind timer. It bails out
+# whenever another event has already updated this pane's entry (checked
+# via the ts token, so a newer prompt or completion is never clobbered).
+if [ "${1:-}" = "__red-watch" ]; then
+    shift
+    PANE_ID="$1" STATE_FILE="$2" ORIG_TS="$3" LOCK_FILE="$4" ZELLIJ_SESSION_NAME="$5" TAB_ID="$6"
+    POLL_INTERVAL_SEC="${RED_WATCH_POLL_INTERVAL_SEC:-1}"
+    MAX_POLLS="${RED_WATCH_MAX_POLLS:-60}"
+    DUMP_FILE=$(mktemp)
+    i=0
+    while [ "$i" -lt "$MAX_POLLS" ]; do
+        sleep "$POLL_INTERVAL_SEC"
+        CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
+        [ "$CURRENT_TS" = "$ORIG_TS" ] || break
+        zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null
+        if ! grep -qE "Do you want to|No, and tell Claude|don.t ask again" "$DUMP_FILE" 2>/dev/null; then
+            (
+                flock -x 200
+                CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
+                if [ "$CURRENT_TS" = "$ORIG_TS" ]; then
+                    TMP_FILE=$(mktemp)
+                    jq --arg pane "$PANE_ID" '.[$pane].icon = "⏳"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
+                    render_tab
+                fi
+            ) 200>"$LOCK_FILE"
+            break
+        fi
+        i=$((i + 1))
+    done
+    rm -f "$DUMP_FILE"
+    exit 0
+fi
+
 [ -z "$ZELLIJ_SESSION_NAME" ] && exit 0
 PANE_ID="${ZELLIJ_PANE_ID:-}"
 [ -z "$PANE_ID" ] && exit 0
-
-STATE_DIR="/tmp/claude-tab-status"
-mkdir -p "$STATE_DIR"
 
 INPUT=$(cat)
 HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // ""' 2>/dev/null)
@@ -38,18 +89,6 @@ ALIVE_IDS_JSON=$(echo "$PANES_JSON" | jq -c '[.[] | select(.is_plugin==false) | 
 STATE_FILE="${STATE_DIR}/tab-${TAB_ID}.json"
 LOCK_FILE="${STATE_FILE}.lock"
 [ -f "$STATE_FILE" ] || echo "{}" > "$STATE_FILE"
-
-# Re-render the tab name from every pane's current icon in this tab.
-render_tab() {
-    local composite project
-    composite=$(jq -r '[to_entries | sort_by(.key | tonumber)[] | .value.icon] | join("|")' "$STATE_FILE" 2>/dev/null)
-    project=$(jq -r '(to_entries | sort_by(.key | tonumber))[0].value.project // empty' "$STATE_FILE" 2>/dev/null)
-    if [ -z "$composite" ]; then
-        zellij -s "$ZELLIJ_SESSION_NAME" action rename-tab -t "$TAB_ID" "$PROJECT_NAME" 2>/dev/null || true
-    else
-        zellij -s "$ZELLIJ_SESSION_NAME" action rename-tab -t "$TAB_ID" "${composite} ${project}" 2>/dev/null || true
-    fi
-}
 
 if [ "$HOOK_EVENT" = "SessionEnd" ]; then
     (
@@ -88,12 +127,19 @@ case "$HOOK_EVENT" in
     *) exit 0 ;;
 esac
 
+TS=$(date +%s%N)
 (
     flock -x 200
     TMP_FILE=$(mktemp)
-    jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$(date +%s)" \
-        'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: ($ts | tonumber)}' \
+    jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
+        'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
         "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
         && mv "$TMP_FILE" "$STATE_FILE"
     render_tab
 ) 200>"$LOCK_FILE"
+
+if [ "$ICON" = "🔴" ]; then
+    setsid "$0" __red-watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
+        </dev/null >/dev/null 2>&1 &
+    disown
+fi
