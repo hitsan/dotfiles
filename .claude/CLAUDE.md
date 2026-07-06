@@ -31,14 +31,13 @@ nix flake update
 | `email` | GitHub noreply アドレス |
 | `home` | `/home/hitsan` |
 | `shell` | `zsh` |
-| `modules` | モジュールディレクトリのパス |
 | `openclaw` | openclaw パッケージ |
 
 ### モジュール構成
 ```
 home/default.nix   # ユーザー設定（username, stateVersion, EDITOR, ssh）
 home/shell.nix     # zsh エイリアス
-modules/default.nix  # 全モジュールを import + direnv, devbox, glow, make, just
+modules/default.nix  # 全モジュールを import するだけの集約ファイル
 modules/<name>/    # 各ツールの設定（下記参照）
 ```
 
@@ -46,9 +45,9 @@ modules/<name>/    # 各ツールの設定（下記参照）
 
 | ディレクトリ | 内容 |
 |-------------|------|
-| `ai/` | claude, coderabbit, codex, gemini |
+| `ai/` | claude, coderabbit, codex |
 | `browser/` | ブラウザ |
-| `cli/` | CLI ユーティリティ |
+| `cli/` | CLI ユーティリティ + direnv |
 | `docker/` | Docker |
 | `git/` | git, gh, ghq, lazygit |
 | `lang/` | プログラミング言語 |
