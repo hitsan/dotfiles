@@ -24,8 +24,8 @@ render_tab() {
 }
 
 # There is no hook event for "permission granted, tool execution resumed" —
-# once a permission prompt sets 🔴, the next event is PostToolUse at
-# completion, so a long-running approved tool leaves 🔴 shown the whole
+# once a permission prompt sets 🔔, the next event is PostToolUse at
+# completion, so a long-running approved tool leaves 🔔 shown the whole
 # time. This worker (spawned detached, see bottom of file) polls the
 # pane's own screen content for the permission-dialog text and switches to
 # a generic busy icon as soon as the dialog is gone (i.e. the user
@@ -55,7 +55,7 @@ if [ "${1:-}" = "__red-watch" ]; then
                 CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
                 if [ "$CURRENT_TS" = "$ORIG_TS" ]; then
                     TMP_FILE=$(mktemp)
-                    jq --arg pane "$PANE_ID" '.[$pane].icon = "◐"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
+                    jq --arg pane "$PANE_ID" '.[$pane].icon = "⏳"' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
                     render_tab
                 fi
             ) 200>"$LOCK_FILE"
@@ -105,18 +105,18 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
     exit 0
 fi
 
-# Four states: 🔴 needs the user, ◐ busy, ✗ tool failed, ✅ user's turn.
+# Four states: 🔔 needs the user, ⏳ busy, ✗ tool failed, ✅ user's turn.
 case "$HOOK_EVENT" in
-    UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="◐" ;;
+    UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="⏳" ;;
     PostToolUseFailure) ICON="✗" ;;
     Notification)
         NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
         case "$NOTIF_TYPE" in
-            permission_prompt|elicitation_dialog|agent_needs_input) ICON="🔴" ;;
+            permission_prompt|elicitation_dialog|agent_needs_input) ICON="🔔" ;;
             *) exit 0 ;;
         esac
         ;;
-    PermissionRequest)  ICON="🔴" ;;
+    PermissionRequest)  ICON="🔔" ;;
     Stop)               ICON="✅" ;;
     *) exit 0 ;;
 esac
@@ -132,9 +132,9 @@ TS=$(date +%s%N)
     render_tab
 ) 200>"$LOCK_FILE"
 
-if [ "$ICON" = "🔴" ]; then
+if [ "$ICON" = "🔔" ]; then
     WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
-    # A prior 🔴 event may still have its watcher running; kill it before
+    # A prior 🔔 event may still have its watcher running; kill it before
     # starting a new one so only one watcher per pane polls at a time.
     OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
     [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
