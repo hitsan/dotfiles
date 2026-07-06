@@ -43,8 +43,7 @@ if [ "${1:-}" = "__red-watch" ]; then
         sleep "$POLL_INTERVAL_SEC"
         CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
         [ "$CURRENT_TS" = "$ORIG_TS" ] || break
-        zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null
-        if [ $? -ne 0 ]; then
+        if ! zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null; then
             # dump失敗をダイアログ消失と誤判定しないよう、この周回は判定せず次へ進む
             i=$((i + 1))
             continue
@@ -102,6 +101,7 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
         jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
         render_tab
     ) 200>"$LOCK_FILE"
+    rm -f "${STATE_DIR}/watch-${PANE_ID}.pid"
     exit 0
 fi
 
