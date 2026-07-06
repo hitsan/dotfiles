@@ -1,4 +1,4 @@
-{ pkgs, modules, shell, ... }:
+{ pkgs, shell, ... }:
 {
   home.packages = [
     pkgs.zellij
@@ -35,10 +35,10 @@
       }
     '';
   };
-  home.file.".config/zellij/config.kdl".source = "${modules}/zellij/config.kdl";
-  home.file.".config/zellij/layouts/compact.kdl".source = "${modules}/zellij/layouts/compact.kdl";
+  home.file.".config/zellij/config.kdl".source = ./config.kdl;
+  home.file.".config/zellij/layouts/compact.kdl".source = ./layouts/compact.kdl;
   home.file.".config/zellij/scripts/claude-tab-status.sh" = {
-    source = "${modules}/zellij/scripts/claude-tab-status.sh";
+    source = ./scripts/claude-tab-status.sh;
     executable = true;
   };
 }

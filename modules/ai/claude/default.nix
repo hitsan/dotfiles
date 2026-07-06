@@ -1,4 +1,4 @@
-{ lib, pkgs, shell, modules, ... }:
+{ lib, pkgs, shell, ... }:
 {
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
@@ -9,13 +9,13 @@
     claude-code
   ];
 
-  home.file.".claude/CLAUDE.md".source = "${modules}/ai/claude/template/CLAUDE.md";
+  home.file.".claude/CLAUDE.md".source = ./template/CLAUDE.md;
   home.file.".claude/statusline-command.sh" = {
-    source = "${modules}/ai/claude/template/statusline-command.sh";
+    source = ./template/statusline-command.sh;
     executable = true;
   };
-  home.file.".claude/agents".source = "${modules}/ai/claude/template/agents";
-  home.file.".claude/skills/design".source = "${modules}/ai/claude/template/skills/design";
-  home.file.".claude/skills/arch".source = "${modules}/ai/claude/template/skills/arch";
-  home.file.".claude/skills/modeling".source = "${modules}/ai/claude/template/skills/modeling";
+  home.file.".claude/agents".source = ./template/agents;
+  home.file.".claude/skills/design".source = ./template/skills/design;
+  home.file.".claude/skills/arch".source = ./template/skills/arch;
+  home.file.".claude/skills/modeling".source = ./template/skills/modeling;
 }

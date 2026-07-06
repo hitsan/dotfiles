@@ -17,15 +17,13 @@
     user = "hitsan";
     email = "15902694+hitsan@users.noreply.github.com";
     home = "/home/${user}";
-    root = builtins.toString ./.;
-    modules = "${root}/modules";
     shell = "zsh";
     openclaw = nix-openclaw.packages.${system}.openclaw;
   in
   {
     homeConfigurations.${user} = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
-      extraSpecialArgs = { inherit user email home shell modules openclaw; };
+      extraSpecialArgs = { inherit user email home shell openclaw; };
 
       modules = [
         ./home/default.nix
