@@ -78,6 +78,11 @@ fi
 PANE_ID="${ZELLIJ_PANE_ID:-}"
 [ -z "$PANE_ID" ] && exit 0
 
+# Capture the event time before the slow list-panes call so it tracks hook
+# dispatch order. Hooks run async as separate racing processes, so the write
+# below uses this as a token: an older event never clobbers a newer one.
+TS=$(date +%s%N)
+
 INPUT=$(cat)
 HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // ""' 2>/dev/null)
 CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null)
@@ -128,15 +133,19 @@ case "$HOOK_EVENT" in
     *) exit 0 ;;
 esac
 
-TS=$(date +%s%N)
 (
     flock -x 200
-    TMP_FILE=$(mktemp)
-    jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
-        'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
-        "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
-        && mv "$TMP_FILE" "$STATE_FILE"
-    render_tab
+    # Skip if a newer event already wrote this pane (async hooks can race).
+    STORED_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // "0"' "$STATE_FILE" 2>/dev/null)
+    case "$STORED_TS" in ''|*[!0-9]*) STORED_TS=0 ;; esac
+    if [ "$STORED_TS" -le "$TS" ]; then
+        TMP_FILE=$(mktemp)
+        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
+            'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
+            "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
+            && mv "$TMP_FILE" "$STATE_FILE"
+        render_tab
+    fi
 ) 200>"$LOCK_FILE"
 
 if [ "$ICON" = "$ICON_NEEDS_USER" ]; then
