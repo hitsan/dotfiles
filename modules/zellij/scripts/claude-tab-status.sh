@@ -144,7 +144,13 @@ TS=$(date +%s%N)
 ) 200>"$LOCK_FILE"
 
 if [ "$ICON" = "🔴" ]; then
+    WATCH_PID_FILE="${STATE_DIR}/watch-${PANE_ID}.pid"
+    # A prior 🔴 event may still have its watcher running; kill it before
+    # starting a new one so only one watcher per pane polls at a time.
+    OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
+    [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
     setsid "$0" __red-watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
         </dev/null >/dev/null 2>&1 &
+    echo "$!" > "$WATCH_PID_FILE"
     disown
 fi
