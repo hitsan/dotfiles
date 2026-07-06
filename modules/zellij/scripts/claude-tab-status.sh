@@ -44,6 +44,11 @@ if [ "${1:-}" = "__red-watch" ]; then
         CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
         [ "$CURRENT_TS" = "$ORIG_TS" ] || break
         zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null
+        if [ $? -ne 0 ]; then
+            # dump失敗をダイアログ消失と誤判定しないよう、この周回は判定せず次へ進む
+            i=$((i + 1))
+            continue
+        fi
         if ! grep -qE "Do you want to|No, and tell Claude|don.t ask again" "$DUMP_FILE" 2>/dev/null; then
             (
                 flock -x 200
