@@ -93,10 +93,6 @@ keybinds clear-defaults=true {
         bind "e" { EditScrollback; SwitchToMode "normal"; }
         bind "s" { SwitchToMode "entersearch"; SearchInput 0; }
     }
-    // "tmux" is an unused built-in mode name repurposed for the keybind hint display; unrelated to tmux itself
-    tmux {
-        bind "Ctrl k" { SwitchToMode "normal"; }
-    }
     search {
         bind "c" { SearchToggleOption "CaseSensitivity"; }
         bind "n" { Search "down"; }
@@ -190,9 +186,6 @@ keybinds clear-defaults=true {
     shared_except "locked" "scroll" "search" {
         bind "Ctrl s" { SwitchToMode "scroll"; }
     }
-    shared_except "locked" "tmux" {
-        bind "Ctrl k" { SwitchToMode "tmux"; }
-    }
     shared_except "locked" "tab" {
         bind "Ctrl t" { SwitchToMode "tab"; }
     }
@@ -259,6 +252,12 @@ plugins {
     welcome-screen location="zellij:session-manager" {
         welcome_screen true
     }
+    zjstatus-hints location="https://github.com/b0o/zjstatus-hints/releases/latest/download/zjstatus-hints.wasm" {
+        max_length 0
+        overflow_str "..."
+        pipe_name "zjstatus_hints"
+        hide_in_base_mode true
+    }
 }
 
 // Plugins to load in the background when a new session starts
@@ -266,6 +265,7 @@ plugins {
 // eg. "https://example.com/my-plugin.wasm"
 load_plugins {
     "zellij:link"
+    zjstatus-hints
 }
  
 // Use a simplified UI without special fonts (arrow glyphs)
