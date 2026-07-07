@@ -138,9 +138,24 @@ esac
     # Skip if a newer event already wrote this pane (async hooks can race).
     STORED_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // "0"' "$STATE_FILE" 2>/dev/null)
     case "$STORED_TS" in ''|*[!0-9]*) STORED_TS=0 ;; esac
-    if [ "$STORED_TS" -le "$TS" ]; then
+    # Stop marks the turn's final state. Its TS is taken at dispatch time, so
+    # a racing PostToolUse for the same turn can still finish writing first
+    # and leave a stale busy icon behind. Stop always wins here, and bumps
+    # its recorded ts past whatever is stored so later stragglers from the
+    # same turn (necessarily older, smaller TS) don't clobber it back.
+    if [ "$ICON" = "$ICON_DONE" ]; then
+        EFFECTIVE_TS=$TS
+        [ "$STORED_TS" -ge "$EFFECTIVE_TS" ] && EFFECTIVE_TS=$((STORED_TS + 1))
+        WRITE=1
+    elif [ "$STORED_TS" -le "$TS" ]; then
+        EFFECTIVE_TS=$TS
+        WRITE=1
+    else
+        WRITE=0
+    fi
+    if [ "$WRITE" = "1" ]; then
         TMP_FILE=$(mktemp)
-        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
+        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$EFFECTIVE_TS" \
             'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
             "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
             && mv "$TMP_FILE" "$STATE_FILE"
