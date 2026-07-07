@@ -1,0 +1,145 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/hitsan/.config/zellij/scripts/claude-tab-status.sh",
+            "timeout": 5,
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh /home/hitsan/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "ppt-creator@daymade-skills": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "draw-io@claude-drawio-skill": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-drawio-skill": {
+      "source": {
+        "source": "github",
+        "repo": "little-hands/claude-drawio-skill"
+      }
+    },
+    "claude-code-zellij-status": {
+      "source": {
+        "source": "git",
+        "url": "https://github.com/thoo/claude-code-zellij-status.git"
+      }
+    }
+  },
+  "language": "日本語",
+  "effortLevel": "high",
+  "tui": "fullscreen"
+}

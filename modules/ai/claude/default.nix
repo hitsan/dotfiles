@@ -10,6 +10,7 @@
   ];
 
   home.file.".claude/CLAUDE.md".source = ./template/CLAUDE.md;
+  home.file.".claude/settings.json".source = ./template/settings.json;
   home.file.".claude/statusline-command.sh" = {
     source = ./template/statusline-command.sh;
     executable = true;
