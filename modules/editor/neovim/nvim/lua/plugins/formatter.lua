@@ -22,7 +22,7 @@ return {
       conform.setup({
         formatters_by_ft = {
           lua = { "stylua" },
-          nix = { "nixpkgs-fmt" },
+          nix = { "nixpkgs_fmt" },
           rust = { "rustfmt" },
           go = { "gofmt" },
           javascript = { "prettier" },
