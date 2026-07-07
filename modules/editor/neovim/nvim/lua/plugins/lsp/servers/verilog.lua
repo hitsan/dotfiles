@@ -14,6 +14,9 @@ return function(capabilities, on_attach)
     on_attach = on_attach,
     filetypes = { "verilog", "systemverilog" },
     capabilities = capabilities,
+    root_dir = function(bufnr, on_dir)
+      on_dir(vim.fs.root(bufnr, { ".git" }))
+    end,
     settings = {
       systemverilog = {
         -- Enable SystemVerilog syntax (always_comb, etc.)
@@ -26,16 +29,5 @@ return function(capabilities, on_attach)
     },
   })
 
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "verilog", "systemverilog" },
-    callback = function(event)
-      local svls_config = vim.lsp.config["svls"]
-      if svls_config then
-        local config = vim.tbl_extend("force", svls_config, {
-          root_dir = vim.fs.root(event.buf, { ".git" }),
-        })
-        vim.lsp.start(config, { bufnr = event.buf })
-      end
-    end,
-  })
+  vim.lsp.enable("svls")
 end
