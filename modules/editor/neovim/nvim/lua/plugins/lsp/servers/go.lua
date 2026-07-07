@@ -1,10 +1,11 @@
 return function(capabilities, on_attach)
-  local filetypes = { "go", "gomod", "gowork", "gotmpl" }
-
   vim.lsp.config("gopls", {
     on_attach = on_attach,
-    filetypes = filetypes,
+    filetypes = { "go", "gomod", "gowork", "gotmpl" },
     capabilities = capabilities,
+    root_dir = function(bufnr, on_dir)
+      on_dir(vim.fs.root(bufnr, { "go.work", "go.mod", ".git" }))
+    end,
     settings = {
       gopls = {
         analyses = {
@@ -15,13 +16,5 @@ return function(capabilities, on_attach)
     },
   })
 
-  vim.api.nvim_create_autocmd("FileType", {
-    pattern = filetypes,
-    callback = function(event)
-      local config = vim.lsp.config["gopls"]
-      if config then
-        vim.lsp.start(config, { bufnr = event.buf })
-      end
-    end,
-  })
+  vim.lsp.enable("gopls")
 end
