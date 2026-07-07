@@ -36,29 +36,31 @@ nix flake update
 ### モジュール構成
 ```
 home/default.nix   # ユーザー設定（username, stateVersion, EDITOR, ssh）
-home/shell.nix     # zsh エイリアス
 modules/default.nix  # 全モジュールを import するだけの集約ファイル
 modules/<name>/    # 各ツールの設定（下記参照）
 ```
+
+zsh 設定（zsh本体・zoxide・fzf・pay-respects）は `modules/shell/` に移動した。
 
 ## モジュール一覧
 
 | ディレクトリ | 内容 |
 |-------------|------|
-| `ai/` | claude, coderabbit, codex |
-| `browser/` | ブラウザ |
-| `cli/` | CLI ユーティリティ + direnv |
-| `docker/` | Docker |
-| `git/` | git, gh, ghq, lazygit |
-| `lang/` | プログラミング言語 |
-| `navi/` | navi チートシート |
-| `neovim/` | Neovim + Lua プラグイン |
-| `yazi/` | ファイルマネージャ |
-| `zellij/` | ターミナルマルチプレクサ |
+| `shell/` | zsh, zoxide, fzf, pay-respects |
+| `dev/` | just, gnumake, devbox, direnv, act |
+| `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi |
+| `lang/` | プログラミング言語ランタイム |
+| `editor/` | neovim |
+| `terminal/` | zellij |
+| `git/` | git, gh, ghq, lazygit, worktrunk |
+| `ai/` | claude, codex, coderabbit |
+| `container/` | lazydocker |
+| `files/` | yazi |
+| `browser/` | chromium |
 
 ## 新モジュールを追加するとき
 
-1. `modules/<name>/default.nix` を作成
+1. `modules/<name>/default.nix` を作成（非nixアセットを同梱するなら `foo/` ディレクトリ、純nixなら `foo.nix` フラットファイル）
 2. `modules/default.nix` の `imports` に `./name` を追加
 3. モジュール引数に必要な `extraSpecialArgs` 変数を宣言する
 
