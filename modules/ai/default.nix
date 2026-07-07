@@ -2,7 +2,7 @@
 {
   imports = [
     ./claude
-    ./codex
-    ./coderabbit
+    ./codex.nix
+    ./coderabbit.nix
   ];
 }
