@@ -6,7 +6,7 @@
     ./editor
     ./git
     ./ai
-    ./docker
+    ./container
     ./lang
     ./cli
     ./dev
