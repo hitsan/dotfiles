@@ -14,19 +14,13 @@
   ];
   programs = {
     fd.enable = true;
-    fzf.enable = true;
-    zoxide.enable = true;
     ripgrep.enable = true;
-    pay-respects.enable = true;
     direnv = {
       enable = true;
       nix-direnv.enable = true;
     };
 
     ${shell} = {
-      initContent = ''
-        eval "$(pay-respects zsh --alias f)"
-      '';
       shellAliases = {
         l = "eza";
         ll = "eza -l";
