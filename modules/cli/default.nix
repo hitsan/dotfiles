@@ -1,29 +1,14 @@
-{ pkgs, shell, ... }:
+{ ... }:
 {
-  home.packages = with pkgs; [
-    act
-    bat
-    eza
-    jq
-    termscp
-    vhs
+  imports = [
+    ./bat.nix
+    ./eza.nix
+    ./fd.nix
+    ./ripgrep.nix
+    ./jq.nix
+    ./glow.nix
+    ./termscp.nix
+    ./vhs.nix
+    ./navi
   ];
-  programs = {
-    fd.enable = true;
-    fzf.enable = true;
-    zoxide.enable = true;
-    ripgrep.enable = true;
-    pay-respects.enable = true;
-
-    ${shell} = {
-      initContent = ''
-        eval "$(pay-respects zsh --alias f)"
-      '';
-      shellAliases = {
-        l = "eza";
-        ll = "eza -l";
-        lt = "eza -T";
-      };
-    };
-  };
 }

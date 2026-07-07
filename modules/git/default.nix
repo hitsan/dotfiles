@@ -1,24 +1,10 @@
-{ pkgs, user, email, ... }:
+{ ... }:
 {
-  programs = {
-    git = {
-      enable = true;
-      settings = {
-        user = {
-          name = user;
-          email = email;
-        };
-        init.defaultBranch = "main";
-      };
-    };
-  };
-  home.packages = with pkgs; [
-    git-filter-repo
-  ];
   imports = [
+    ./git.nix
     ./gh.nix
-    ./lazygit
     ./ghq.nix
     ./worktrunk.nix
+    ./lazygit
   ];
 }

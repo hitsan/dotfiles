@@ -4,8 +4,6 @@
   home.homeDirectory = home;
   home.stateVersion = "26.05";
 
-  home.file = { };
-
   home.sessionVariables = {
     EDITOR = "nvim";
   };
@@ -23,7 +21,4 @@
   };
   
   services.ssh-agent.enable = true;
-  imports = [
-    ./shell.nix
-  ];
 }
