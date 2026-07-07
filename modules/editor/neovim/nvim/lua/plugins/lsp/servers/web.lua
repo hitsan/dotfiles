@@ -28,9 +28,12 @@ return function(capabilities, on_attach)
       end
 
       for _, action in ipairs(result.result) do
+        -- a CodeAction may carry both an edit and a command; apply the edit
+        -- first, then run the command so neither is silently dropped
         if action.edit then
           vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-        elseif action.command then
+        end
+        if action.command then
           client:exec_cmd(action.command, { bufnr = args.buf })
         end
       end
