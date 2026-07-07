@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ./shell
     ./zellij
     ./neovim
     ./git
