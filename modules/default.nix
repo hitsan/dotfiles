@@ -2,7 +2,7 @@
 {
   imports = [
     ./shell
-    ./zellij
+    ./terminal
     ./editor
     ./git
     ./ai
