@@ -3,7 +3,7 @@
   imports = [
     ./shell
     ./zellij
-    ./neovim
+    ./editor
     ./git
     ./ai
     ./docker
