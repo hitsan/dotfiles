@@ -9,6 +9,7 @@
     ./docker
     ./lang
     ./cli
+    ./dev
     ./browser
     ./yazi
     ./navi
