@@ -11,6 +11,6 @@
     ./cli
     ./dev
     ./browser
-    ./yazi
+    ./files
   ];
 }
