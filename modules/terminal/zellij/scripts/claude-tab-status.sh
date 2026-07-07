@@ -29,6 +29,22 @@ render_tab() {
     fi
 }
 
+# Whether an event's icon write should be applied. DONE marks the turn as
+# over; only a new turn (UserPromptSubmit) may leave it, so a same-turn hook
+# invocation that finishes late (e.g. a slow PostToolUse landing after Stop)
+# is dropped here regardless of how the async hook processes raced.
+should_write() {
+    local stored_icon="$1" hook_event="$2"
+    if [ "$stored_icon" = "$ICON_DONE" ] && [ "$hook_event" != "UserPromptSubmit" ]; then
+        return 1
+    fi
+    return 0
+}
+
+# Test hook: sourcing this file with ZELLIJ_TAB_STATUS_TEST set loads the
+# functions above (for unit testing) without running the CLI body below.
+[ -n "${ZELLIJ_TAB_STATUS_TEST:-}" ] && return 0 2>/dev/null
+
 # There is no hook event for "permission granted, tool execution resumed" —
 # once a permission prompt sets 🔔, the next event is PostToolUse at
 # completion, so a long-running approved tool leaves 🔔 shown the whole
@@ -77,11 +93,6 @@ fi
 [ -z "$ZELLIJ_SESSION_NAME" ] && exit 0
 PANE_ID="${ZELLIJ_PANE_ID:-}"
 [ -z "$PANE_ID" ] && exit 0
-
-# Capture the event time before the slow list-panes call so it tracks hook
-# dispatch order. Hooks run async as separate racing processes, so the write
-# below uses this as a token: an older event never clobbers a newer one.
-TS=$(date +%s%N)
 
 INPUT=$(cat)
 HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // ""' 2>/dev/null)
@@ -133,29 +144,19 @@ case "$HOOK_EVENT" in
     *) exit 0 ;;
 esac
 
+# ts is recorded per pane only as a generation token for the __watch poller
+# below (has this pane's entry changed since I started watching?), not to
+# arbitrate write order — async hook processes finish in whatever order the
+# OS schedules them, so ordering by arrival time is unreliable. Write
+# eligibility is instead decided by should_write()'s state-transition rule.
+TS=$(date +%s%N)
+
 (
     flock -x 200
-    # Skip if a newer event already wrote this pane (async hooks can race).
-    STORED_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // "0"' "$STATE_FILE" 2>/dev/null)
-    case "$STORED_TS" in ''|*[!0-9]*) STORED_TS=0 ;; esac
-    # Stop marks the turn's final state. Its TS is taken at dispatch time, so
-    # a racing PostToolUse for the same turn can still finish writing first
-    # and leave a stale busy icon behind. Stop always wins here, and bumps
-    # its recorded ts past whatever is stored so later stragglers from the
-    # same turn (necessarily older, smaller TS) don't clobber it back.
-    if [ "$ICON" = "$ICON_DONE" ]; then
-        EFFECTIVE_TS=$TS
-        [ "$STORED_TS" -ge "$EFFECTIVE_TS" ] && EFFECTIVE_TS=$((STORED_TS + 1))
-        WRITE=1
-    elif [ "$STORED_TS" -le "$TS" ]; then
-        EFFECTIVE_TS=$TS
-        WRITE=1
-    else
-        WRITE=0
-    fi
-    if [ "$WRITE" = "1" ]; then
+    STORED_ICON=$(jq -r --arg p "$PANE_ID" '.[$p].icon // ""' "$STATE_FILE" 2>/dev/null)
+    if should_write "$STORED_ICON" "$HOOK_EVENT"; then
         TMP_FILE=$(mktemp)
-        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$EFFECTIVE_TS" \
+        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
             'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
             "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
             && mv "$TMP_FILE" "$STATE_FILE"
