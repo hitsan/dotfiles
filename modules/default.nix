@@ -12,6 +12,5 @@
     ./dev
     ./browser
     ./yazi
-    ./navi
   ];
 }

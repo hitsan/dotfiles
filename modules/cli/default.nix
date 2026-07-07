@@ -1,24 +1,14 @@
-{ pkgs, shell, ... }:
+{ ... }:
 {
-  home.packages = with pkgs; [
-    bat
-    eza
-    glow
-    jq
-    termscp
-    vhs
+  imports = [
+    ./bat.nix
+    ./eza.nix
+    ./fd.nix
+    ./ripgrep.nix
+    ./jq.nix
+    ./glow.nix
+    ./termscp.nix
+    ./vhs.nix
+    ./navi
   ];
-  programs = {
-    fd.enable = true;
-    ripgrep.enable = true;
-
-    ${shell} = {
-      shellAliases = {
-        l = "eza";
-        ll = "eza -l";
-        lt = "eza -T";
-        glow = "glow -p -w $(tput cols)";
-      };
-    };
-  };
 }
