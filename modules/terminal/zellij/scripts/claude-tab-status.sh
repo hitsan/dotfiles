@@ -132,13 +132,9 @@ fi
 case "$HOOK_EVENT" in
     UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="$ICON_BUSY" ;;
     PostToolUseFailure) ICON="$ICON_FAILED" ;;
-    Notification)
-        NOTIF_TYPE=$(echo "$INPUT" | jq -r '.notification_type // ""' 2>/dev/null)
-        case "$NOTIF_TYPE" in
-            permission_prompt|elicitation_dialog|agent_needs_input) ICON="$ICON_NEEDS_USER" ;;
-            *) exit 0 ;;
-        esac
-        ;;
+    # matcher (settings.json) already filters to elicitation_dialog/agent_needs_input,
+    # so any Notification reaching this script means the user's input is needed.
+    Notification)       ICON="$ICON_NEEDS_USER" ;;
     PermissionRequest)  ICON="$ICON_NEEDS_USER" ;;
     Stop)               ICON="$ICON_DONE" ;;
     *) exit 0 ;;
