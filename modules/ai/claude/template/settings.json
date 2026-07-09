@@ -95,7 +95,7 @@
     ],
     "Notification": [
       {
-        "matcher": "elicitation_dialog|agent_needs_input",
+        "matcher": "permission_prompt|elicitation_dialog|agent_needs_input",
         "hooks": [
           {
             "type": "command",

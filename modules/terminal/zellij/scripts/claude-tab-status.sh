@@ -2,8 +2,7 @@
 # Rename the zellij tab a Claude Code pane belongs to, so its activity status
 # is visible on the tab itself. Supports multiple Claude panes in the same
 # tab: each pane's icon is tracked independently and the tab name is always
-# re-rendered from every pane's current icon, so only the changed slot's
-# glyph actually differs between renders.
+# re-rendered from every pane's current icon.
 #
 # Resolves pane_id -> tab_id via `list-panes -t` so the correct tab is
 # targeted even when it isn't the currently focused one.
@@ -12,10 +11,10 @@ STATE_DIR="/tmp/claude-tab-status"
 mkdir -p "$STATE_DIR"
 
 # The four tab states. Named so a glyph change is one edit, not a scatter.
-ICON_NEEDS_USER="🔔"  # waiting on the user (permission / input)
+ICON_NEEDS_USER="🔔"  # your turn: permission / input needed
 ICON_BUSY="⏳"         # Claude is working
 ICON_FAILED="✗"        # a tool call failed
-ICON_DONE="✅"         # Claude finished; user's turn
+ICON_DONE="✅"         # Claude finished; your turn
 
 # Re-render the tab name from every pane's current icon in this tab.
 render_tab() {
@@ -29,10 +28,9 @@ render_tab() {
     fi
 }
 
-# Whether an event's icon write should be applied. DONE marks the turn as
-# over; only a new turn (UserPromptSubmit) may leave it, so a same-turn hook
-# invocation that finishes late (e.g. a slow PostToolUse landing after Stop)
-# is dropped here regardless of how the async hook processes raced.
+# Once ✅ (done) is shown, a working event that lands late must not flip it back
+# to ⏳ — async hooks finish in whatever order the OS schedules them, so a slow
+# PostToolUse can land after Stop. Only a new turn (UserPromptSubmit) leaves DONE.
 should_write() {
     local stored_icon="$1" hook_event="$2"
     if [ "$stored_icon" = "$ICON_DONE" ] && [ "$hook_event" != "UserPromptSubmit" ]; then
@@ -45,51 +43,6 @@ should_write() {
 # functions above (for unit testing) without running the CLI body below.
 [ -n "${ZELLIJ_TAB_STATUS_TEST:-}" ] && return 0 2>/dev/null
 
-# There is no hook event for "permission granted, tool execution resumed" —
-# once a permission prompt sets 🔔, the next event is PostToolUse at
-# completion, so a long-running approved tool leaves 🔔 shown the whole
-# time. This worker (spawned detached, see bottom of file) polls the
-# pane's own screen content for the permission-dialog text and switches to
-# a generic busy icon as soon as the dialog is gone (i.e. the user
-# answered it), instead of guessing on a blind timer. It bails out
-# whenever another event has already updated this pane's entry (checked
-# via the ts token, so a newer prompt or completion is never clobbered).
-if [ "${1:-}" = "__watch" ]; then
-    shift
-    # Positional args must match the spawn site at the bottom of this file.
-    PANE_ID="$1" STATE_FILE="$2" ORIG_TS="$3" LOCK_FILE="$4" ZELLIJ_SESSION_NAME="$5" TAB_ID="$6"
-    POLL_INTERVAL_SEC="${WATCH_POLL_INTERVAL_SEC:-1}"
-    MAX_POLLS="${WATCH_MAX_POLLS:-60}"
-    DUMP_FILE=$(mktemp)
-    i=0
-    while [ "$i" -lt "$MAX_POLLS" ]; do
-        sleep "$POLL_INTERVAL_SEC"
-        CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
-        [ "$CURRENT_TS" = "$ORIG_TS" ] || break
-        if ! zellij -s "$ZELLIJ_SESSION_NAME" action dump-screen -p "$PANE_ID" --path "$DUMP_FILE" 2>/dev/null; then
-            # Don't treat a dump failure as the dialog being gone; skip this round.
-            i=$((i + 1))
-            continue
-        fi
-        # '.' matches the apostrophe variants in "don't ask again".
-        if ! grep -qE "Do you want to|No, and tell Claude|don.t ask again" "$DUMP_FILE" 2>/dev/null; then
-            (
-                flock -x 200
-                CURRENT_TS=$(jq -r --arg p "$PANE_ID" '.[$p].ts // empty' "$STATE_FILE" 2>/dev/null)
-                if [ "$CURRENT_TS" = "$ORIG_TS" ]; then
-                    TMP_FILE=$(mktemp)
-                    jq --arg pane "$PANE_ID" --arg icon "$ICON_BUSY" '.[$pane].icon = $icon' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
-                    render_tab
-                fi
-            ) 200>"$LOCK_FILE"
-            break
-        fi
-        i=$((i + 1))
-    done
-    rm -f "$DUMP_FILE"
-    exit 0
-fi
-
 [ -z "$ZELLIJ_SESSION_NAME" ] && exit 0
 PANE_ID="${ZELLIJ_PANE_ID:-}"
 [ -z "$PANE_ID" ] && exit 0
@@ -97,7 +50,6 @@ PANE_ID="${ZELLIJ_PANE_ID:-}"
 INPUT=$(cat)
 HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // ""' 2>/dev/null)
 CWD=$(echo "$INPUT" | jq -r '.cwd // ""' 2>/dev/null)
-
 [ -z "$HOOK_EVENT" ] && exit 0
 
 PROJECT_NAME=$(basename "$CWD" 2>/dev/null || echo "?")
@@ -115,7 +67,6 @@ ALIVE_IDS_JSON=$(echo "$PANES_JSON" | jq -c '[.[] | select(.is_plugin==false) | 
 
 STATE_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-tab-${TAB_ID}.json"
 LOCK_FILE="${STATE_FILE}.lock"
-WATCH_PID_FILE="${STATE_DIR}/${ZELLIJ_SESSION_NAME}-watch-${PANE_ID}.pid"
 [ -f "$STATE_FILE" ] || echo "{}" > "$STATE_FILE"
 
 if [ "$HOOK_EVENT" = "SessionEnd" ]; then
@@ -125,49 +76,28 @@ if [ "$HOOK_EVENT" = "SessionEnd" ]; then
         jq --arg pane "$PANE_ID" 'del(.[$pane])' "$STATE_FILE" > "$TMP_FILE" 2>/dev/null && mv "$TMP_FILE" "$STATE_FILE"
         render_tab
     ) 200>"$LOCK_FILE"
-    rm -f "$WATCH_PID_FILE"
     exit 0
 fi
 
 case "$HOOK_EVENT" in
     UserPromptSubmit|PreToolUse|PostToolUse|SubagentStop) ICON="$ICON_BUSY" ;;
     PostToolUseFailure) ICON="$ICON_FAILED" ;;
-    # matcher (settings.json) already filters to elicitation_dialog/agent_needs_input,
-    # so any Notification reaching this script means the user's input is needed.
+    # matcher (settings.json) already filters this to user-input-needed types.
     Notification)       ICON="$ICON_NEEDS_USER" ;;
     PermissionRequest)  ICON="$ICON_NEEDS_USER" ;;
     Stop)               ICON="$ICON_DONE" ;;
     *) exit 0 ;;
 esac
 
-# ts is recorded per pane only as a generation token for the __watch poller
-# below (has this pane's entry changed since I started watching?), not to
-# arbitrate write order — async hook processes finish in whatever order the
-# OS schedules them, so ordering by arrival time is unreliable. Write
-# eligibility is instead decided by should_write()'s state-transition rule.
-TS=$(date +%s%N)
-
 (
     flock -x 200
     STORED_ICON=$(jq -r --arg p "$PANE_ID" '.[$p].icon // ""' "$STATE_FILE" 2>/dev/null)
     if should_write "$STORED_ICON" "$HOOK_EVENT"; then
         TMP_FILE=$(mktemp)
-        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" --arg ts "$TS" \
-            'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project, ts: $ts}' \
+        jq --argjson alive "$ALIVE_IDS_JSON" --arg pane "$PANE_ID" --arg icon "$ICON" --arg project "$PROJECT_NAME" \
+            'with_entries(select(.key as $k | ($alive | index($k)) != null)) | .[$pane] = {icon: $icon, project: $project}' \
             "$STATE_FILE" > "$TMP_FILE" 2>/dev/null \
             && mv "$TMP_FILE" "$STATE_FILE"
         render_tab
     fi
 ) 200>"$LOCK_FILE"
-
-if [ "$ICON" = "$ICON_NEEDS_USER" ]; then
-    # A prior needs-user event may still have its watcher running; kill it
-    # before starting a new one so only one watcher per pane polls at a time.
-    OLD_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null)
-    [ -n "$OLD_PID" ] && kill "$OLD_PID" 2>/dev/null
-    # Arg order must match the __watch handler at the top of this file.
-    setsid "$0" __watch "$PANE_ID" "$STATE_FILE" "$TS" "$LOCK_FILE" "$ZELLIJ_SESSION_NAME" "$TAB_ID" \
-        </dev/null >/dev/null 2>&1 &
-    echo "$!" > "$WATCH_PID_FILE"
-    disown
-fi
