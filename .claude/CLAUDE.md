@@ -22,7 +22,6 @@ nix flake update
 |-------|------|
 | `nixpkgs-unstable` | パッケージ |
 | `home-manager` | ユーザー設定管理 |
-| `nix-openclaw` | openclaw パッケージ |
 
 ### extraSpecialArgs（全モジュールで利用可能）
 | 変数 | 値 |
@@ -31,7 +30,6 @@ nix flake update
 | `email` | GitHub noreply アドレス |
 | `home` | `/home/hitsan` |
 | `shell` | `zsh` |
-| `openclaw` | openclaw パッケージ |
 
 ### モジュール構成
 ```
