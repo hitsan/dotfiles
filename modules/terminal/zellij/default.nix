@@ -32,6 +32,17 @@
         fi
         title+=":%~"
         print -Pn "\e]2;$title\a"
+
+        if [[ -n "$ZELLIJ" ]]; then
+          # rename-tab targets the tab by id, not "the caller's own tab" -- resolve
+          # and cache it once per pane so every prompt isn't a list-panes round trip.
+          if [[ -z "$__ZELLIJ_TAB_ID" ]]; then
+            __ZELLIJ_TAB_ID=$(zellij action list-panes -t -j 2>/dev/null | jq -r --arg id "$ZELLIJ_PANE_ID" '.[] | select(.is_plugin==false and (.id|tostring)==$id) | .tab_id')
+          fi
+          if [[ -n "$__ZELLIJ_TAB_ID" ]]; then
+            zellij action rename-tab -t "$__ZELLIJ_TAB_ID" "$(basename "$PWD")" 2>/dev/null
+          fi
+        fi
       }
     '';
   };
