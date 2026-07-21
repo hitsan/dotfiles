@@ -20,4 +20,5 @@
   home.file.".claude/skills/arch".source = ./template/skills/arch;
   home.file.".claude/skills/modeling".source = ./template/skills/modeling;
   home.file.".claude/skills/zellij-send".source = ./template/skills/zellij-send;
+  home.file.".claude/skills/html-report".source = ./template/skills/html-report;
 }
