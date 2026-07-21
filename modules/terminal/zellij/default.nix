@@ -41,4 +41,8 @@
     source = ./scripts/claude-tab-status.sh;
     executable = true;
   };
+  home.file.".config/zellij/scripts/zellij-send.sh" = {
+    source = ./scripts/zellij-send.sh;
+    executable = true;
+  };
 }
