@@ -6,6 +6,7 @@ dir=$(printf '%s' "$input" | jq -r '.workspace.current_dir')
 model=$(printf '%s' "$input" | jq -r '.model.display_name')
 ctx=$(printf '%s' "$input" | jq -r '.context_window.used_percentage // empty')
 rl5=$(printf '%s' "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+rl5_reset=$(printf '%s' "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 
 branch=""
 if git --no-optional-locks -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -40,6 +41,14 @@ fi
 if [ -n "$rl5" ]; then
   r5=${rl5%%.*}
   out="${out} ${DIM}·${RESET} $(pct_color "$r5")5h ${r5}%${RESET}"
+  if [ -n "$rl5_reset" ]; then
+    remain=$((rl5_reset - $(date +%s)))
+    if [ "$remain" -gt 0 ]; then
+      rh=$((remain / 3600))
+      rm=$(((remain % 3600) / 60))
+      out="${out} ${DIM}(reset ${rh}h${rm}m)${RESET}"
+    fi
+  fi
 fi
 
 printf '%b\n' "$out"
