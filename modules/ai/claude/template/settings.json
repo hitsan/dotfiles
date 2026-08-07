@@ -150,7 +150,8 @@
   "enabledPlugins": {
     "ppt-creator@daymade-skills": true,
     "typescript-lsp@claude-plugins-official": true,
-    "draw-io@claude-drawio-skill": true
+    "draw-io@claude-drawio-skill": true,
+    "ponytail@ponytail": true
   },
   "extraKnownMarketplaces": {
     "claude-drawio-skill": {
@@ -163,6 +164,12 @@
       "source": {
         "source": "git",
         "url": "https://github.com/thoo/claude-code-zellij-status.git"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
       }
     }
   },
