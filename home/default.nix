@@ -1,4 +1,4 @@
-{ pkgs, user, home, shell, ... }:
+{ user, home, ... }:
 {
   home.username = user;
   home.homeDirectory = home;
@@ -8,7 +8,6 @@
     EDITOR = "nvim";
   };
 
-  # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
   programs = {
     ssh = {
@@ -19,6 +18,6 @@
       };
     };
   };
-  
+
   services.ssh-agent.enable = true;
 }

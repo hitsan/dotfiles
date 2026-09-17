@@ -44,16 +44,16 @@ zsh 設定（zsh本体・zoxide・fzf・pay-respects）は `modules/shell/` に�
 
 | ディレクトリ | 内容 |
 |-------------|------|
-| `shell/` | zsh, zoxide, fzf, pay-respects |
+| `shell/` | zsh, zoxide, fzf, pay-respects（シェル本体、またはシェルの起動スクリプトへのフック注入が必要なツール） |
 | `dev/` | just, gnumake, devbox, direnv, act |
-| `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi |
+| `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi（`home.packages`にバイナリを置くだけで完結する単体コマンド） |
 | `lang/` | プログラミング言語ランタイム |
 | `editor/` | neovim |
 | `terminal/` | zellij |
 | `git/` | git, gh, ghq, lazygit, worktrunk |
 | `ai/` | claude, codex, coderabbit |
 | `container/` | lazydocker |
-| `files/` | yazi |
+| `files/` | yazi, fonts（CJK日本語フォント） |
 | `browser/` | chromium |
 
 ## 新モジュールを追加するとき
