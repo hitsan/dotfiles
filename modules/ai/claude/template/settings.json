@@ -151,7 +151,8 @@
     "ppt-creator@daymade-skills": true,
     "typescript-lsp@claude-plugins-official": true,
     "draw-io@claude-drawio-skill": true,
-    "ponytail@ponytail": true
+    "ponytail@ponytail": true,
+    "typesafe@typesafe-ai": true
   },
   "extraKnownMarketplaces": {
     "claude-drawio-skill": {
@@ -170,6 +171,12 @@
       "source": {
         "source": "github",
         "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "typesafe-ai": {
+      "source": {
+        "source": "github",
+        "repo": "typesafe-ai/skills"
       }
     }
   },
