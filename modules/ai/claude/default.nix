@@ -1,4 +1,7 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, home, ... }:
+let
+  link = path: config.lib.file.mkOutOfStoreSymlink "${home}/dotfiles/modules/ai/claude/template/${path}";
+in
 {
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
@@ -9,12 +12,9 @@
     claude-code
   ];
 
-  home.file.".claude/CLAUDE.md".source = ./template/CLAUDE.md;
-  home.file.".claude/settings.json".source = ./template/settings.json;
-  home.file.".claude/statusline-command.sh" = {
-    source = ./template/statusline-command.sh;
-    executable = true;
-  };
-  home.file.".claude/agents".source = ./template/agents;
-  home.file.".claude/skills/archify".source = ./template/skills/archify;
+  home.file.".claude/CLAUDE.md".source = link "CLAUDE.md";
+  home.file.".claude/settings.json".source = link "settings.json";
+  home.file.".claude/statusline-command.sh".source = link "statusline-command.sh";
+  home.file.".claude/agents".source = link "agents";
+  home.file.".claude/skills/archify".source = link "skills/archify";
 }
