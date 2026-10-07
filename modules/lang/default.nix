@@ -4,5 +4,6 @@
     gcc
     nodejs
     python3
+    uv
   ];
 }

@@ -152,7 +152,8 @@
     "typescript-lsp@claude-plugins-official": true,
     "draw-io@claude-drawio-skill": true,
     "ponytail@ponytail": true,
-    "typesafe@typesafe-ai": true
+    "typesafe@typesafe-ai": true,
+    "natural-japanese@natural-japanese": true
   },
   "extraKnownMarketplaces": {
     "claude-drawio-skill": {
@@ -177,6 +178,12 @@
       "source": {
         "source": "github",
         "repo": "typesafe-ai/skills"
+      }
+    },
+    "natural-japanese": {
+      "source": {
+        "source": "github",
+        "repo": "coji/natural-japanese"
       }
     }
   },
