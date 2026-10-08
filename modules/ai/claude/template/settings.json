@@ -33,7 +33,7 @@
     ]
   },
   "env": {
-    "CLAUDE_CODE_PLUGIN_DIRS": "~/dotfiles/modules/terminal/zellij/claude-mod"
+    "CLAUDE_CODE_PLUGIN_DIRS": "~/dotfiles/modules/ai/claude/mods/zellij-status"
   },
   "statusLine": {
     "type": "command",
