@@ -38,8 +38,4 @@
   };
   home.file.".config/zellij/config.kdl".source = ./config.kdl;
   home.file.".config/zellij/layouts/compact.kdl".source = ./layouts/compact.kdl;
-  home.file.".config/zellij/scripts/zellij-send.sh" = {
-    source = ./scripts/zellij-send.sh;
-    executable = true;
-  };
 }

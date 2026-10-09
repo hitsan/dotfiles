@@ -38,19 +38,17 @@ modules/default.nix  # 全モジュールを import するだけの集約ファ�
 modules/<name>/    # 各ツールの設定（下記参照）
 ```
 
-zsh 設定（zsh本体・zoxide・fzf・pay-respects）は `modules/shell/` に移動した。
-
 ## モジュール一覧
 
 | ディレクトリ | 内容 |
 |-------------|------|
-| `shell/` | zsh, zoxide, fzf, pay-respects（シェル本体、またはシェルの起動スクリプトへのフック注入が必要なツール） |
+| `shell/` | zsh, zoxide, fzf, pay-respects（シェル本体と、シェル操作そのものを拡張するツール） |
 | `dev/` | just, gnumake, devbox, direnv, act |
-| `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi（`home.packages`にバイナリを置くだけで完結する単体コマンド） |
+| `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi（他ツールと連携しない単体コマンド） |
 | `lang/` | プログラミング言語ランタイム |
 | `editor/` | neovim |
 | `terminal/` | zellij |
-| `git/` | git, gh, ghq, lazygit, worktrunk |
+| `git/` | git, gh, glab, ghq, lazygit, worktrunk |
 | `ai/` | claude, codex, coderabbit |
 | `container/` | lazydocker |
 | `files/` | yazi, fonts（CJK日本語フォント） |
@@ -88,3 +86,12 @@ zsh 設定（zsh本体・zoxide・fzf・pay-respects）は `modules/shell/` に�
 - `home.stateVersion` は変更しない（Home Manager の互換性に影響）
 - パッケージ追加は `home.packages` より `programs.<name>.enable` を優先する
 - `shell` 変数を使って `programs.${shell}` に設定を書くとシェル非依存になる
+
+## モジュール間の依存
+
+- shell は全モジュールの土台。どのモジュールも `programs.${shell}` に alias や
+  init を無条件に書いてよい（`shell/` に集約しない）。
+- それ以外のモジュール同士の連携設定は、使う側のモジュールに置き、
+  `lib.mkIf config.programs.<依存先>.enable` で囲む。
+  例: zellij-status mod の `CLAUDE_CODE_PLUGIN_DIRS` は `ai/claude/` に置き、
+  `config.programs.zellij.enable` で条件付けしている。
