@@ -28,19 +28,19 @@ export const register: Register = on => {
   })
 
   on('classic.PermissionRequest', async ($, e, next) => {
-    signal($, { kind: 'needsUser' })
+    signal($, { kind: 'needsUser', agentId: e.agent_id })
     return next(e)
   })
 
   on('classic.Notification', async ($, e, next) => {
-    if (NEEDS_USER_NOTIFICATIONS.includes(e.notification_type ?? '')) signal($, { kind: 'needsUser' })
+    if (NEEDS_USER_NOTIFICATIONS.includes(e.notification_type ?? '')) signal($, { kind: 'needsUser', agentId: e.agent_id })
     return next(e)
   })
 
   on('tool.call', async ($, e, next) => {
-    if (e.tool === 'AskUserQuestion') signal($, { kind: 'needsUser' })
+    if (e.tool === 'AskUserQuestion') signal($, { kind: 'needsUser', agentId: e.agentId })
     const ran = await next(e)
-    signal($, { kind: 'toolDone' })
+    signal($, { kind: 'toolDone', agentId: e.agentId })
     return ran
   })
 
