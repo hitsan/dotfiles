@@ -49,7 +49,7 @@ modules/<name>/    # 各ツールの設定（下記参照）
 | `editor/` | neovim |
 | `terminal/` | zellij |
 | `git/` | git, gh, glab, ghq, lazygit, worktrunk |
-| `ai/` | claude, codex, coderabbit |
+| `ai/` | claude, codex |
 | `container/` | lazydocker |
 | `files/` | yazi, fonts（CJK日本語フォント） |
 | `browser/` | chromium |
