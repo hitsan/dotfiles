@@ -1,18 +1,6 @@
-{ pkgs, shell, ... }:
+{ shell, ... }:
 {
-  home.packages = [
-    pkgs.zellij
-  ];
-
-  programs.zellij = {
-    enableZshIntegration = true;
-    settings = {
-      "zellij.default" = {
-        "theme" = "dark";
-        "layout" = "default";
-      };
-    };
-  };
+  programs.zellij.enable = true;
 
   programs.${shell} = {
     shellAliases = {
