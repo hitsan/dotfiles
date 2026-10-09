@@ -1,6 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  home.packages = with pkgs; [
-    codex
-  ];
+  programs.codex.enable = true;
 }

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  home.packages = [ pkgs.jq ];
+  programs.jq.enable = true;
 }
