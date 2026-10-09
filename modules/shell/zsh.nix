@@ -7,7 +7,6 @@
 
     shellAliases = {
       home = "home-manager switch --flake ~/dotfiles#${user}";
-      hflake = "home-manager switch --flake ~/dotfiles#${user}";
       
       # System aliases
       down = "sudo shutdown -h 0";
