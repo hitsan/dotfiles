@@ -32,12 +32,9 @@
       "Bash(sudo:*)"
     ]
   },
-  "env": {
-    "CLAUDE_CODE_PLUGIN_DIRS": "~/dotfiles/modules/ai/claude/mods/zellij-status"
-  },
   "statusLine": {
     "type": "command",
-    "command": "sh /home/hitsan/.claude/statusline-command.sh"
+    "command": "sh ~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
     "ppt-creator@daymade-skills": true,
@@ -52,12 +49,6 @@
       "source": {
         "source": "github",
         "repo": "little-hands/claude-drawio-skill"
-      }
-    },
-    "claude-code-zellij-status": {
-      "source": {
-        "source": "git",
-        "url": "https://github.com/thoo/claude-code-zellij-status.git"
       }
     },
     "ponytail": {
