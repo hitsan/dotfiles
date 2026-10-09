@@ -11,7 +11,7 @@
       zsf = "zellij -l strider";
     };
     initContent = ''
-      function precmd() {
+      function __dotfiles_title_precmd() {
         local branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
         local host=$(hostname)
         local title="$host"
@@ -32,6 +32,8 @@
           fi
         fi
       }
+      autoload -Uz add-zsh-hook
+      add-zsh-hook precmd __dotfiles_title_precmd
     '';
   };
   home.file.".config/zellij/config.kdl".source = ./config.kdl;
