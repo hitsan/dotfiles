@@ -2,6 +2,7 @@ import { expect, test } from 'claude-code/testing'
 
 test('engine events reach the bundled tab script in order, as icons', async ($, on) => {
   const sent: string[] = []
+  on('session.surfaces', async () => ({ value: ['terminal'] }) as never)
   let allSent = () => {}
   const fourSent = new Promise<void>(r => (allSent = r))
   on('process.run', async (_$, e) => {
@@ -24,6 +25,7 @@ test('engine events reach the bundled tab script in order, as icons', async ($, 
 
 test('a subagent tool finishing does not clear the main prompt', async ($, on) => {
   const sent: string[] = []
+  on('session.surfaces', async () => ({ value: ['terminal'] }) as never)
   let ended = () => {}
   const sessionEnded = new Promise<void>(r => (ended = r))
   on('process.run', async (_$, e) => {
@@ -41,4 +43,19 @@ test('a subagent tool finishing does not clear the main prompt', async ($, on) =
   await $.session.end({ reason: 'other' } as never)
   await sessionEnded
   expect(sent).toEqual(['⏳', '🔔', '-'])
+})
+
+test('a headless run (claude -p) leaves the tab alone', async ($, on) => {
+  const sent: string[] = []
+  on('session.surfaces', async () => ({ value: [] }) as never)
+  on('process.run', async (_$, e) => {
+    sent.push(e.argv[1]!)
+    return { value: { exitCode: 0, stdout: '', stderr: '' } } as never
+  })
+  on('turn.start', async () => ({ turnId: 't1' }))
+  on('session.end', async () => ({ sessionId: 's1' }))
+  await $.turn.start({ text: 'hi', turnId: 't1' } as never)
+  await $.session.end({ reason: 'other' } as never)
+  await new Promise(r => setTimeout(r, 50))
+  expect(sent).toEqual([])
 })
