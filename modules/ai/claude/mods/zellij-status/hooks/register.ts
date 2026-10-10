@@ -9,9 +9,13 @@ let status = IDLE
 let queue: Promise<unknown> = Promise.resolve()
 
 // Chained, not awaited: the tab script runs in event order without holding up the turn.
+// Headless runs (claude -p) inherit the parent's ZELLIJ_PANE_ID, so they must not touch its tab.
 function run($: EngineInterface, icon: string) {
   queue = queue
-    .then(() => $.process.run([`${$.plugin.root}/scripts/claude-tab-status.sh`, icon], { timeoutMs: 5000 }))
+    .then(async () => {
+      if (!(await $.session.surfaces()).length) return
+      await $.process.run([`${$.plugin.root}/scripts/claude-tab-status.sh`, icon], { timeoutMs: 5000 })
+    })
     .catch(() => undefined)
 }
 
