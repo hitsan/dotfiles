@@ -17,17 +17,21 @@
     email = "15902694+hitsan@users.noreply.github.com";
     home = "/home/${user}";
     shell = "zsh";
-  in
-  {
-    homeConfigurations."${user}@capella" = home-manager.lib.homeManagerConfiguration {
+    mkHome = host: home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
       extraSpecialArgs = { inherit user email home shell; };
 
       modules = [
         ./home/default.nix
         ./modules
-        ./hosts/capella
+        ./hosts/${host}
       ];
+    };
+  in
+  {
+    homeConfigurations = {
+      "${user}@capella" = mkHome "capella";
+      "${user}@spica" = mkHome "spica";
     };
   };
 }
