@@ -25,6 +25,15 @@ home-manager build --flake .
 nix flake update
 ```
 
+## Windows 設定（PC ごと）
+
+`hosts/<pc名>/windows.ps1` に Windows 側の設定をまとめている（`home-manager switch` からは呼ばれない）。
+CapsLock→Ctrl などの HKLM 設定は管理者権限が必要（非管理者ならスキップされる）。WSL から手動で実行する:
+
+```sh
+powershell.exe -ExecutionPolicy Bypass -File "$(wslpath -w hosts/capella/windows.ps1)"
+```
+
 ## Tips
 
 ### zellij: zjstatus / zjstatus-hints の権限
