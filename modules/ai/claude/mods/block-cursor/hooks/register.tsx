@@ -84,11 +84,6 @@ export const register: Register = on => {
     )
   })
 
-  on('ui.render', { component: 'PromptHint' }, async ($, e, next) => {
-    if (await read($, isFocused)) return next(e)
-    return next({ ...e, props: { ...e.props, tail: 'alt+c' } })
-  })
-
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.props.hasSurvey) return next(e)
     const { Box, Button, Text } = $.ui.resolve(e)
@@ -97,10 +92,9 @@ export const register: Register = on => {
 
     // autoFocus makes the band raise ui.focus when it takes the keys, which is how isFocused learns of it.
     if (!focused) {
-      // Zero rows: the band stays focusable (an empty one cannot take the keys) without showing above the engine's notice row.
       return (
-        <Box height={0} overflow="hidden">
-          <Button plain autoFocus key="open" label="alt+c" onPress={() => update($, isFocused, () => true)} />
+        <Box justifyContent="flex-end" width={e.props.bodyColumns}>
+          <Button plain autoFocus key="open" label="alt+c" dimColor onPress={() => update($, isFocused, () => true)} />
         </Box>
       )
     }
