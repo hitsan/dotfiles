@@ -53,9 +53,9 @@ export const register: Register = on => {
 
     return (
       <Box>
-        <Button key="prev" hotkey="k" label="前" onPress={() => move($, -1)} />
-        <Button key="next" hotkey="j" label="次" onPress={() => move($, 1)} />
-        <Button key="copy" hotkey="y" label="コピー" onPress={press => c && $.ui.copy({ text: c.copy, surface: press.surface })} />
+        <Button plain key="prev" hotkey="k" label="前" onPress={() => move($, -1)} />
+        <Button plain key="next" hotkey="j" label="次" onPress={() => move($, 1)} />
+        <Button plain key="copy" hotkey="y" label="コピー" onPress={press => c && $.ui.copy({ text: c.copy, surface: press.surface })} />
         <Text dimColor>{c ? `${c.pos}/${c.total}` : ''}</Text>
       </Box>
     )
