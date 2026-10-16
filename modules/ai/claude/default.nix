@@ -16,7 +16,9 @@ in
   home.file.".claude/agents".source = link "agents";
   home.file.".claude/skills/archify".source = link "skills/archify";
 
-  home.sessionVariables = lib.mkIf config.programs.zellij.enable {
-    CLAUDE_CODE_PLUGIN_DIRS = "${home}/dotfiles/modules/ai/claude/mods/zellij-status";
-  };
+  home.sessionVariables.CLAUDE_CODE_PLUGIN_DIRS = lib.concatStringsSep ":" (
+    map (mod: "${home}/dotfiles/modules/ai/claude/mods/${mod}") (
+      [ "block-cursor" ] ++ lib.optional config.programs.zellij.enable "zellij-status"
+    )
+  );
 }

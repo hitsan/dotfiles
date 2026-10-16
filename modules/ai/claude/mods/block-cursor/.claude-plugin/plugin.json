@@ -1,0 +1,1 @@
+{ "name": "block-cursor", "version": "0.1.0", "description": "Move a cursor over code blocks and quotes in replies and copy them", "types": "./types/index.d.ts" }
