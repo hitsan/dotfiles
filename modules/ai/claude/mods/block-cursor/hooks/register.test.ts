@@ -47,7 +47,7 @@ test('a finished turn puts the cursor on the last chunk', async ($, on) => {
   expect(JSON.stringify(await reply.drawn())).toContain('▶')
 })
 
-test('the band is just alt+c until it takes the keys, then a framed box', async ($, on) => {
+test('the band is just alt+c until it takes the keys, then one shaded row', async ($, on) => {
   on('ui.render', async () => ENGINE)
   on('ui.focus', async () => ({}))
   const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', requestId: 'band', props: BAND } as never)
@@ -55,7 +55,9 @@ test('the band is just alt+c until it takes the keys, then a framed box', async 
   expect(await band.find({ key: 'up' })).toBeUndefined()
 
   await $.ui.focus({ requestId: 'band', key: 'open' } as never)
-  expect(await band.find({ type: 'Box' })).toMatchObject({ props: { borderStyle: 'round' } })
+  const box = await band.find({ type: 'Box' })
+  expect(box?.props).toMatchObject({ backgroundColor: expect.any(String) })
+  expect(box?.props).not.toHaveProperty('borderStyle')
   expect(await band.find({ key: 'close' })).toMatchObject({ props: { autoFocus: true } })
   expect(await band.find({ key: 'up' })).toBeDefined()
   expect(await band.find({ text: 'esc' })).toBeUndefined()
