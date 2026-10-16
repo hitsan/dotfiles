@@ -60,9 +60,9 @@ test('the band is just alt+c until it takes the keys, then a framed box', async 
   expect(await band.find({ text: 'esc' })).toBeDefined()
 })
 
-test('alt+c sits right-aligned in the band until the band takes the keys', async ($, on) => {
+test('the framed box holds alt+c, right-aligned, until the band takes the keys', async ($, on) => {
   on('ui.render', async () => ENGINE)
   const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', requestId: 'band', props: BAND } as never)
-  expect(await band.drawn()).toMatchObject({ type: 'Box', props: { justifyContent: 'flex-end', width: 80 } })
+  expect(await band.drawn()).toMatchObject({ type: 'Box', props: { borderStyle: 'round', width: 80 } })
   expect(await band.find({ key: 'open' })).toMatchObject({ props: { label: 'alt+c' } })
 })
