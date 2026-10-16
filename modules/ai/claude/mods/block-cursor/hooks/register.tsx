@@ -1,13 +1,14 @@
 import { atom, read, update } from 'claude-code'
-import type { EngineInterface, Register } from 'claude-code'
+import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import type { Cursor } from '../types'
 import { segments } from './blocks'
 import type { Segment } from './blocks'
 
 const cursor = atom({ plugin: 'block-cursor', key: 'cursor' } as const, null)
-// The engine raises no event when the band gives the keys back, so the next prompt edit stands in for it.
 const isFocused = atom({ plugin: 'block-cursor', key: 'isFocused' } as const, false)
+let ring = 'up'
+let watch: Timer | undefined
 // Filled while drawing, in transcript order; a hot reload empties it until replies are drawn again.
 const drawn = new Map<string, Segment[]>()
 
@@ -30,6 +31,17 @@ async function move($: EngineInterface, by: number) {
   await $.ui.scroll({ to: { requestId: k.id }, block: 'center' }).catch(() => undefined)
 }
 
+// The engine raises nothing when Esc gives the band's keys back, but $.ui.focus is denied from then on.
+// ponytail: polls every 300ms while the box is open; switch to an event if the engine adds one.
+function watchFocus($: EngineInterface, band: string) {
+  watch ??= $.clock.every(300, async () => {
+    if (!(await $.ui.focus({ requestId: band, key: ring })).deny) return
+    watch?.cancel()
+    watch = undefined
+    await update($, isFocused, () => false)
+  })
+}
+
 async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<EngineInterface['ui']['copy']>[0]['surface']) {
   if (!c) return $.ui.toast('先に k で塊を選んでください')
   const r = await $.ui.copy({ text: c.copy, surface })
@@ -38,12 +50,11 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 
 export const register: Register = on => {
   on('ui.focus', async ($, e, next) => {
-    if (e.component !== 'Pane') await update($, isFocused, () => true)
-    return next(e)
-  })
-
-  on('prompt.edit', async ($, e, next) => {
-    if (await read($, isFocused)) await update($, isFocused, () => false)
+    if (e.component === 'Pane') return next(e)
+    // 'open' is replaced by the box as soon as it draws.
+    ring = !e.element || e.element === 'open' ? 'up' : e.element
+    await update($, isFocused, () => true)
+    watchFocus($, e.requestId)
     return next(e)
   })
 

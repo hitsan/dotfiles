@@ -47,10 +47,9 @@ test('a finished turn puts the cursor on the last chunk', async ($, on) => {
   expect(JSON.stringify(await reply.drawn())).toContain('▶')
 })
 
-test('the band is just alt+c until it takes the keys, then a framed box until the prompt is edited', async ($, on) => {
+test('the band is just alt+c until it takes the keys, then a framed box', async ($, on) => {
   on('ui.render', async () => ENGINE)
   on('ui.focus', async () => ({}))
-  on('prompt.edit', async (_$, e) => ({ text: e.text, cursor: e.cursor }))
   const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', requestId: 'band', props: BAND } as never)
   expect(await band.find({ key: 'open' })).toMatchObject({ props: { label: 'alt+c' } })
   expect(await band.find({ key: 'up' })).toBeUndefined()
@@ -59,7 +58,4 @@ test('the band is just alt+c until it takes the keys, then a framed box until th
   expect(await band.find({ type: 'Box' })).toMatchObject({ props: { borderStyle: 'round' } })
   expect(await band.find({ key: 'up' })).toBeDefined()
   expect(await band.find({ text: 'esc' })).toBeDefined()
-
-  await ($.prompt as unknown as { edit: (e: unknown) => Promise<unknown> }).edit({ origin: { kind: 'person' }, text: 'h', cursor: 1, start: 0, end: 0, inputText: 'h' })
-  expect(await band.find({ key: 'up' })).toBeUndefined()
 })
