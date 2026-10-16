@@ -8,15 +8,12 @@ const cursor = atom({ plugin: 'block-cursor', key: 'cursor' } as const, null)
 // ponytail: blocks are matched by raw text, so an identical block in two replies is marked in both
 const drawnAt = new Map<string, string>()
 
-async function allBlocks($: EngineInterface) {
-  const messages = await $.session.messages()
-  return messages.filter(m => m.role === 'assistant').flatMap(m => segments(m.text).filter(s => s.copy !== undefined))
-}
-
 async function move($: EngineInterface, by: number) {
-  const blocks = await allBlocks($)
+  const messages = await $.session.messages()
+  const replies = messages.filter(m => m.role === 'assistant')
+  const blocks = replies.flatMap(m => segments(m.text).filter(s => s.copy !== undefined))
   if (!blocks.length) {
-    $.ui.toast('コピーできるブロックがありません')
+    $.ui.toast(`コピーできるブロックがありません（全 ${messages.length} 件 / 返信 ${replies.length} 件 / 文字 ${replies.reduce((n, m) => n + m.text.length, 0)}）`)
     return
   }
   const current = await read($, cursor)
