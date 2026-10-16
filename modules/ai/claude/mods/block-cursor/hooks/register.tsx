@@ -6,6 +6,8 @@ import { segments } from './blocks'
 import type { Segment } from './blocks'
 
 const cursor = atom({ plugin: 'block-cursor', key: 'cursor' } as const, null)
+// The engine raises no event when the band gives the keys back, so the next prompt edit stands in for it.
+const isFocused = atom({ plugin: 'block-cursor', key: 'isFocused' } as const, false)
 // Filled while drawing, in transcript order; a hot reload empties it until replies are drawn again.
 const drawn = new Map<string, Segment[]>()
 
@@ -23,8 +25,7 @@ async function move($: EngineInterface, by: number) {
   const at = all.findIndex(k => k.id === c?.id && k.index === c?.index)
   const i = Math.min(Math.max((at < 0 ? all.length : at) + by, 0), all.length - 1)
   const k = all[i]!
-  const next: Cursor = { ...k, pos: i + 1, total: all.length }
-  await update($, cursor, () => next)
+  await update($, cursor, (): Cursor => k)
   // Best effort: the main screen (non-fullscreen) cannot move transcript rows.
   await $.ui.scroll({ to: { requestId: k.id }, block: 'center' }).catch(() => undefined)
 }
@@ -36,10 +37,20 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 }
 
 export const register: Register = on => {
+  on('ui.focus', async ($, e, next) => {
+    if (e.component !== 'Pane') await update($, isFocused, () => true)
+    return next(e)
+  })
+
+  on('prompt.edit', async ($, e, next) => {
+    if (await read($, isFocused)) await update($, isFocused, () => false)
+    return next(e)
+  })
+
   on('turn.complete', async ($, e, next) => {
     const all = chunks()
     const last = all.at(-1)
-    if (last) await update($, cursor, (): Cursor => ({ ...last, pos: all.length, total: all.length }))
+    if (last) await update($, cursor, (): Cursor => last)
     return next(e)
   })
 
@@ -66,8 +77,9 @@ export const register: Register = on => {
     if (e.props.hasSurvey) return next(e)
     const { Box, Button, Text } = $.ui.resolve(e)
     const c = await read($, cursor)
+    const focused = await read($, isFocused)
 
-    // The band's focus is not exposed, so the engine's focus ring (autoFocus) shows it instead of a border color.
+    // autoFocus makes the band raise ui.focus when it takes the keys, which is how isFocused learns of it.
     return (
       <Box borderStyle="round" borderDimColor paddingX={1} justifyContent="space-between" width={e.props.bodyColumns}>
         <Box gap={2}>
@@ -75,10 +87,7 @@ export const register: Register = on => {
           <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
           <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
         </Box>
-        <Box gap={2}>
-          <Text dimColor>{c ? `${c.pos}/${c.total}` : '-'}</Text>
-          <Text dimColor>alt+c</Text>
-        </Box>
+        <Text dimColor>{focused ? 'esc で戻る' : 'alt+c で操作'}</Text>
       </Box>
     )
   })
