@@ -59,3 +59,16 @@ test('the band is just alt+c until it takes the keys, then a framed box', async 
   expect(await band.find({ key: 'up' })).toBeDefined()
   expect(await band.find({ text: 'esc' })).toBeDefined()
 })
+
+test('alt+c sits at the end of the hint line, and the band is drawn zero rows tall, until the band takes the keys', async ($, on) => {
+  on('ui.render', async (_$, e) => ({ type: 'Text', props: {}, children: [(e.props as { tail?: string }).tail ?? ''] }) as never)
+  on('ui.focus', async () => ({}))
+  const hint = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'PromptHint', props: { isDraft: false, isWorking: false, hint: '? for shortcuts' } })
+  const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', requestId: 'band', props: BAND } as never)
+  expect(await hint.find({ text: 'alt+c' })).toBeDefined()
+  expect(await band.drawn()).toMatchObject({ type: 'Box', props: { height: 0 } })
+
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  await hint.redraw()
+  expect(await hint.find({ text: 'alt+c' })).toBeUndefined()
+})
