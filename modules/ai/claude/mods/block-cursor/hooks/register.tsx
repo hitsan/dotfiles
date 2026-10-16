@@ -91,18 +91,21 @@ export const register: Register = on => {
     const focused = await read($, isFocused)
 
     // autoFocus makes the band raise ui.focus when it takes the keys, which is how isFocused learns of it.
+    if (!focused) {
+      return (
+        <Box justifyContent="flex-end" width={e.props.bodyColumns}>
+          <Button plain autoFocus key="open" label="alt+c" dimColor onPress={() => update($, isFocused, () => true)} />
+        </Box>
+      )
+    }
     return (
       <Box borderStyle="round" borderDimColor paddingX={1} justifyContent="space-between" width={e.props.bodyColumns}>
         <Box gap={2}>
-          {focused && <Button plain autoFocus key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />}
-          {focused && <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />}
-          {focused && <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />}
+          <Button plain autoFocus key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
+          <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
+          <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
         </Box>
-        {focused ? (
-          <Text dimColor>esc</Text>
-        ) : (
-          <Button plain autoFocus key="open" label="alt+c" dimColor onPress={() => update($, isFocused, () => true)} />
-        )}
+        <Text dimColor>esc</Text>
       </Box>
     )
   })
