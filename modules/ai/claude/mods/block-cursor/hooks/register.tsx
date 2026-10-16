@@ -110,7 +110,7 @@ export const register: Register = on => {
       )
     }
     return (
-      <Box backgroundColor="#3a3a3a" paddingX={1} gap={2} width={e.props.bodyColumns}>
+      <Box paddingX={1} gap={2} width={e.props.bodyColumns}>
         <Button plain autoFocus key="close" label="●" onPress={() => close($)} />
         <Button plain key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
         <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
