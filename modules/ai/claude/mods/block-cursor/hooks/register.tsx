@@ -29,6 +29,8 @@ async function move($: EngineInterface, by: number) {
   const k = all[i]!
   await update($, cursor, (): Cursor => k)
   // Best effort: the main screen (non-fullscreen) cannot move transcript rows.
+  // ponytail: a reply taller than the screen only scrolls to its top, so a chunk near its end stays hidden behind the
+  // prompt. The transcript has no row or key target (a Box key is refused); switch when the engine adds one.
   await $.ui.scroll({ to: { requestId: k.id }, block: 'center' }).catch(() => undefined)
 }
 
