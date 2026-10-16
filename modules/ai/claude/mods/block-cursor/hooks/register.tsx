@@ -15,7 +15,10 @@ async function allBlocks($: EngineInterface) {
 
 async function move($: EngineInterface, by: number) {
   const blocks = await allBlocks($)
-  if (!blocks.length) return
+  if (!blocks.length) {
+    $.ui.toast('コピーできるブロックがありません')
+    return
+  }
   const current = await read($, cursor)
   const pos = Math.min(Math.max((current?.pos ?? blocks.length + 1) + by, 1), blocks.length)
   const b = blocks[pos - 1]!
@@ -24,6 +27,12 @@ async function move($: EngineInterface, by: number) {
   const requestId = drawnAt.get(b.raw)
   // Best effort: the main screen (non-fullscreen) cannot move transcript rows.
   if (requestId) await $.ui.scroll({ to: { requestId }, block: 'center' }).catch(() => undefined)
+}
+
+async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<EngineInterface['ui']['copy']>[0]['surface']) {
+  if (!c) return $.ui.toast('先に k でブロックを選んでください')
+  const r = await $.ui.copy({ text: c.copy, surface })
+  $.ui.toast(r.isCopied ? 'コピーしました' : `コピー失敗: ${r.reason}`)
 }
 
 export const register: Register = on => {
@@ -55,7 +64,7 @@ export const register: Register = on => {
       <Box>
         <Button plain key="prev" hotkey="k" label="前" onPress={() => move($, -1)} />
         <Button plain key="next" hotkey="j" label="次" onPress={() => move($, 1)} />
-        <Button plain key="copy" hotkey="y" label="コピー" onPress={press => c && $.ui.copy({ text: c.copy, surface: press.surface })} />
+        <Button plain key="copy" hotkey="y" label="コピー" onPress={press => copy($, c, press.surface)} />
         <Text dimColor>{c ? `${c.pos}/${c.total}` : ''}</Text>
       </Box>
     )
