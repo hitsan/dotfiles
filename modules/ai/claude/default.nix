@@ -12,6 +12,7 @@ in
 
   home.file.".claude/CLAUDE.md".source = link "CLAUDE.md";
   home.file.".claude/settings.json".source = link "settings.json";
+  home.file.".claude/keybindings.json".source = link "keybindings.json";
   home.file.".claude/statusline-command.sh".source = link "statusline-command.sh";
   home.file.".claude/agents".source = link "agents";
   home.file.".claude/skills/archify".source = link "skills/archify";

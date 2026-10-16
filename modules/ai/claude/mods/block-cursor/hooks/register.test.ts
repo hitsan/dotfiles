@@ -11,6 +11,8 @@ test('k walks up the chunks drawn on screen, j back down; y copies', async ($, o
   const first = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: 'a\n\nb', isFirstOfReply: true } })
   const second = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: '```\nls\n```', isFirstOfReply: true } })
 
+  expect(await band.find({ type: 'Box' })).toMatchObject({ props: { borderStyle: 'round' } })
+  expect(await band.find({ text: 'alt+c' })).toBeDefined()
   await band.press({ key: 'up' })
   expect(await band.find({ text: '3/3' })).toBeDefined()
   expect(JSON.stringify(await second.drawn())).toContain('▶')

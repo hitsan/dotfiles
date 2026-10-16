@@ -67,12 +67,18 @@ export const register: Register = on => {
     const { Box, Button, Text } = $.ui.resolve(e)
     const c = await read($, cursor)
 
+    // The band's focus is not exposed, so the engine's focus ring (autoFocus) shows it instead of a border color.
     return (
-      <Box>
-        <Button plain key="up" hotkey="k" label="上" onPress={() => move($, -1)} />
-        <Button plain key="down" hotkey="j" label="下" onPress={() => move($, 1)} />
-        <Button plain key="copy" hotkey="y" label="コピー" onPress={press => copy($, c, press.surface)} />
-        <Text dimColor>{c ? `${c.pos}/${c.total}` : ''}</Text>
+      <Box borderStyle="round" borderDimColor paddingX={1} justifyContent="space-between" width={e.props.bodyColumns}>
+        <Box gap={2}>
+          <Button plain autoFocus key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
+          <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
+          <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
+        </Box>
+        <Box gap={2}>
+          <Text dimColor>{c ? `${c.pos}/${c.total}` : '-'}</Text>
+          <Text dimColor>alt+c</Text>
+        </Box>
       </Box>
     )
   })
