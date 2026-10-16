@@ -56,8 +56,31 @@ test('the band is just alt+c until it takes the keys, then a framed box', async 
 
   await $.ui.focus({ requestId: 'band', key: 'open' } as never)
   expect(await band.find({ type: 'Box' })).toMatchObject({ props: { borderStyle: 'round' } })
+  expect(await band.find({ key: 'close' })).toMatchObject({ props: { autoFocus: true } })
   expect(await band.find({ key: 'up' })).toBeDefined()
-  expect(await band.find({ text: 'esc' })).toBeDefined()
+  expect(await band.find({ text: 'esc' })).toBeUndefined()
+})
+
+test('the ring never leaves the close mark for k, j or y', async ($, on) => {
+  let reached = 0
+  on('ui.render', async () => ENGINE)
+  on('ui.focus', async () => (reached++, {}))
+  const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', requestId: 'band', props: BAND } as never)
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  reached = 0
+  // Shaped as the engine raises it (the kit hands the call's args on as they are).
+  await $.ui.focus({ component: 'AbovePrompt', requestId: 'band', key: 'up', element: 'up' } as never)
+  expect(reached).toBe(0)
+  expect(await band.find({ key: 'up' })).toBeDefined()
+})
+
+test('pressing the close mark closes the box, drawing alt+c as plain text so the band lets the keys go', async ($, on) => {
+  on('ui.render', async () => ENGINE)
+  const band = await openBand($, on)
+  await band.press({ key: 'close' })
+  expect(await band.find({ key: 'up' })).toBeUndefined()
+  expect(await band.find({ key: 'open' })).toBeUndefined()
+  expect(await band.find({ text: 'alt+c' })).toBeDefined()
 })
 
 test('alt+c sits right-aligned in the band until the band takes the keys', async ($, on) => {
