@@ -9,17 +9,21 @@ const cursor = atom({ plugin: 'block-cursor', key: 'cursor' } as const, null)
 // Filled while drawing, in transcript order; a hot reload empties it until replies are drawn again.
 const drawn = new Map<string, Segment[]>()
 
+function chunks() {
+  return [...drawn].flatMap(([id, segs]) => segs.map((s, index) => ({ id, index, copy: s.copy })))
+}
+
 async function move($: EngineInterface, by: number) {
-  const chunks = [...drawn].flatMap(([id, segs]) => segs.map((s, index) => ({ id, index, copy: s.copy })))
-  if (!chunks.length) {
+  const all = chunks()
+  if (!all.length) {
     $.ui.toast('画面に返信がありません')
     return
   }
   const c = await read($, cursor)
-  const at = chunks.findIndex(k => k.id === c?.id && k.index === c?.index)
-  const i = Math.min(Math.max((at < 0 ? chunks.length : at) + by, 0), chunks.length - 1)
-  const k = chunks[i]!
-  const next: Cursor = { ...k, pos: i + 1, total: chunks.length }
+  const at = all.findIndex(k => k.id === c?.id && k.index === c?.index)
+  const i = Math.min(Math.max((at < 0 ? all.length : at) + by, 0), all.length - 1)
+  const k = all[i]!
+  const next: Cursor = { ...k, pos: i + 1, total: all.length }
   await update($, cursor, () => next)
   // Best effort: the main screen (non-fullscreen) cannot move transcript rows.
   await $.ui.scroll({ to: { requestId: k.id }, block: 'center' }).catch(() => undefined)
@@ -32,6 +36,13 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 }
 
 export const register: Register = on => {
+  on('turn.complete', async ($, e, next) => {
+    const all = chunks()
+    const last = all.at(-1)
+    if (last) await update($, cursor, (): Cursor => ({ ...last, pos: all.length, total: all.length }))
+    return next(e)
+  })
+
   on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
     const segs = segments(e.props.text)
     drawn.set(e.requestId, segs)

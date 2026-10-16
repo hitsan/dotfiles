@@ -26,3 +26,17 @@ test('k walks up the chunks drawn on screen, j back down; y copies', async ($, o
   await band.press({ key: 'down' })
   expect(await band.find({ text: '3/3' })).toBeDefined()
 })
+
+test('a finished turn puts the cursor on the last chunk', async ($, on) => {
+  on('ui.render', async () => ENGINE)
+  on('turn.complete', async () => ({ text: 'ok' }))
+  const band = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AbovePrompt', props: BAND })
+  await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: 'a\n\nb', isFirstOfReply: true } })
+  await band.press({ key: 'up' })
+  await band.press({ key: 'up' })
+  const reply = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: 'c\n\nd', isFirstOfReply: true } })
+
+  await $.turn.complete({ answer: 'c\n\nd', reason: 'answer', turnId: 't1', durationMs: 1, isAborted: false } as never)
+  expect(await band.find({ text: '4/4' })).toBeDefined()
+  expect(JSON.stringify(await reply.drawn())).toContain('▶')
+})
