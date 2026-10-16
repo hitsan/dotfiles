@@ -10,12 +10,19 @@ test('a run of quote lines copies without the markers', async () => {
   expect(segments('> one\n>two')).toEqual([{ raw: '> one\n>two', copy: 'one\ntwo' }])
 })
 
-test('plain text is not a block', async () => {
-  expect(segments('hello\nworld')).toEqual([{ raw: 'hello\nworld' }])
+test('paragraphs split on blank lines', async () => {
+  expect(segments('hello\nworld\n\nnext')).toEqual([
+    { raw: 'hello\nworld', copy: 'hello\nworld' },
+    { raw: 'next', copy: 'next' },
+  ])
+})
+
+test('blank lines inside a fence stay in it', async () => {
+  expect(segments('```\na\n\nb\n```').map(s => s.copy)).toEqual(['a\n\nb'])
 })
 
 test('mixed text keeps its order', async () => {
-  expect(segments('intro\n~~~\nx\n~~~\nmid\n> q\nend').map(s => s.copy)).toEqual([undefined, 'x', undefined, 'q', undefined])
+  expect(segments('intro\n~~~\nx\n~~~\nmid\n> q\nend').map(s => s.copy)).toEqual(['intro', 'x', 'mid', 'q', 'end'])
 })
 
 test('an unclosed fence runs to the end', async () => {

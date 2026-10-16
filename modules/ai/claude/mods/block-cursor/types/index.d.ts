@@ -1,4 +1,4 @@
-export type Cursor = { pos: number; total: number; raw: string; copy: string }
+export type Cursor = { id: string; index: number; pos: number; total: number; copy: string }
 
 declare module 'claude-code' {
   interface PluginState {
