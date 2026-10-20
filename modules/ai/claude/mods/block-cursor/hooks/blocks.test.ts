@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { segments } from './blocks'
+import { scrollBlock, segments } from './blocks'
 
 test('a code fence copies its body', async () => {
   expect(segments('```sh\nls -la\npwd\n```')).toEqual([{ raw: '```sh\nls -la\npwd\n```', copy: 'ls -la\npwd' }])
@@ -27,4 +27,9 @@ test('mixed text keeps its order', async () => {
 
 test('an unclosed fence runs to the end', async () => {
   expect(segments('```\na\nb')).toEqual([{ raw: '```\na\nb', copy: 'a\nb' }])
+})
+
+test('the lower half of a reply scrolls to its end, the upper half to its start', async () => {
+  expect([0, 1, 2, 3].map(i => scrollBlock(i, 4))).toEqual(['start', 'start', 'end', 'end'])
+  expect(scrollBlock(0, 1)).toBe('end')
 })

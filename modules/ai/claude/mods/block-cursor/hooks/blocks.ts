@@ -36,3 +36,8 @@ export function segments(text: string): Segment[] {
   flush()
   return out
 }
+
+// The transcript scrolls to a message, not a row in it, so a tall reply shows the edge nearer the chunk.
+export function scrollBlock(index: number, count: number): 'start' | 'end' {
+  return index * 2 + 1 >= count ? 'end' : 'start'
+}
