@@ -34,6 +34,18 @@ test('k walks up the chunks drawn on screen, j back down; y copies', async ($, o
   expect(JSON.stringify(await second.drawn())).toContain('▶')
 })
 
+test('g jumps to the last chunk', async ($, on) => {
+  on('ui.render', async () => ENGINE)
+  const band = await openBand($, on)
+  await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: 'a\n\nb', isFirstOfReply: true } })
+  const last = await $.ui.mount({ plugin: 'block-cursor', surface: 'terminal', component: 'AssistantMessage', props: { text: 'c\n\nd', isFirstOfReply: true } })
+  for (let i = 0; i < 4; i++) await band.press({ key: 'up' })
+
+  expect(await band.find({ key: 'bottom' })).toMatchObject({ props: { hotkey: 'g' } })
+  await band.press({ key: 'bottom' })
+  expect(JSON.stringify(await last.drawn())).toContain('▶')
+})
+
 test('a finished turn puts the cursor on the last chunk', async ($, on) => {
   on('ui.render', async () => ENGINE)
   on('turn.complete', async () => ({ text: 'ok' }))

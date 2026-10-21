@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, Timer } from 'claude-code'
 
 import type { Cursor } from '../types'
-import { segments } from './blocks'
+import { scrollBlock, segments } from './blocks'
 import type { Segment } from './blocks'
 
 const cursor = atom({ plugin: 'block-cursor', key: 'cursor' } as const, null)
@@ -29,9 +29,10 @@ async function move($: EngineInterface, by: number) {
   const k = all[i]!
   await update($, cursor, (): Cursor => k)
   // Best effort: the main screen (non-fullscreen) cannot move transcript rows.
-  // ponytail: a reply taller than the screen only scrolls to its top, so a chunk near its end stays hidden behind the
-  // prompt. The transcript has no row or key target (a Box key is refused); switch when the engine adds one.
-  await $.ui.scroll({ to: { requestId: k.id }, block: 'center' }).catch(() => undefined)
+  // ponytail: a chunk in the middle of a reply taller than two screens stays hidden. The transcript has no row or key
+  // target (a Box key is refused); switch when the engine adds one.
+  const block = scrollBlock(k.index, drawn.get(k.id)!.length)
+  await $.ui.scroll({ to: { requestId: k.id }, block }).catch(() => undefined)
 }
 
 // The engine raises nothing when Esc gives the band's keys back, but $.ui.focus is denied from then on.
@@ -60,8 +61,8 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 export const register: Register = on => {
   on('ui.focus', async ($, e, next) => {
     if (e.component === 'Pane') return next(e)
-    // k, j and y answer their hotkeys; the ring stays on the close mark.
-    if (e.element === 'up' || e.element === 'down' || e.element === 'copy') return {}
+    // k, j, g and y answer their hotkeys; the ring stays on the close mark.
+    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy') return {}
     await update($, isFocused, () => true)
     watchFocus($, e.requestId)
     return next(e)
@@ -116,6 +117,7 @@ export const register: Register = on => {
         <Button plain autoFocus key="close" label="●" onPress={() => close($)} />
         <Button plain key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
         <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
+        <Button plain key="bottom" hotkey="g" label="⤓" onPress={() => move($, Infinity)} />
         <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
       </Box>
     )
