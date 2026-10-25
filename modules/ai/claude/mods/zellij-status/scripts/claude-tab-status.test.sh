@@ -51,6 +51,10 @@ status 1 -
 (cd "$WORK/other" && ZELLIJ_PANE_ID=2 "$SCRIPT")
 expect_last "a shell redraw in a tab without Claude uses its own dir" "other"
 
+mkdir -p "$WORK/averyverylongdirectory"
+(cd "$WORK/averyverylongdirectory" && ZELLIJ_PANE_ID=2 "$SCRIPT")
+expect_last "a tab without Claude keeps a long dir name whole" "averyverylongdirectory"
+
 : > "$FAKE_LOG"
 (cd "$WORK/myproject" && ZELLIJ_SESSION_NAME='' ZELLIJ_PANE_ID=1 "$SCRIPT" "⏳")
 expect_last "outside zellij nothing is renamed" ""
