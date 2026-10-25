@@ -1,12 +1,16 @@
 #!/bin/bash
-# Usage: claude-tab-status.sh <icon | ->
+# Usage: claude-tab-status.sh [icon | -]
 # Names this pane's zellij tab after the icon of every Claude pane in it plus the
-# project ($PWD); "-" removes this pane. Panes share one state file per tab, so the
+# project ($PWD); "-" removes this pane, and no argument only redraws the name
+# without touching this pane's entry (the shell prompt calls it so a neighbouring
+# shell doesn't wipe Claude's icon). Panes share one state file per tab, so the
 # write is locked: separate Claude processes update it.
 [ -n "$ZELLIJ_SESSION_NAME" ] && [ -n "$ZELLIJ_PANE_ID" ] || exit 0
 z() { zellij -s "$ZELLIJ_SESSION_NAME" action "$@" 2>/dev/null; }
 
-project=$(basename "$PWD")
+dirname=$(basename "$PWD")
+# Shortened only beside icons; a tab with no Claude keeps the whole name.
+project="$dirname"
 [ ${#project} -gt 12 ] && project="${project:0:6}..."
 
 panes=$(z list-panes -t -j | jq -c '[.[] | select(.is_plugin == false)]')
@@ -23,11 +27,11 @@ state="$dir/$ZELLIJ_SESSION_NAME-tab-$tab.json"
   jq --argjson alive "$(jq '[.[].id | tostring]' <<< "$panes")" --arg p "$ZELLIJ_PANE_ID" \
     --arg icon "$1" --arg project "$project" '
       with_entries(select(.key as $k | $alive | index($k)))
-      | if $icon == "-" then del(.[$p]) else .[$p] = {icon: $icon, project: $project} end
+      | if $icon == "" then . elif $icon == "-" then del(.[$p]) else .[$p] = {icon: $icon, project: $project} end
     ' "$state" > "$state.tmp" && mv "$state.tmp" "$state"
-  name=$(jq -r --arg project "$project" '
+  name=$(jq -r --arg dirname "$dirname" '
     to_entries | sort_by(.key | tonumber)
-    | if length == 0 then $project else "\(map(.value.icon) | join("|")) \(.[0].value.project)" end
+    | if length == 0 then $dirname else "\(map(.value.icon) | join("|")) \(.[0].value.project)" end
   ' "$state")
   z rename-tab -t "$tab" "$name"
 ) 200> "$state.lock"

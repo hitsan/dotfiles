@@ -1,4 +1,4 @@
-{ config, lib, home, ... }:
+{ config, lib, home, shell, ... }:
 let
   link = path: config.lib.file.mkOutOfStoreSymlink "${home}/dotfiles/modules/ai/claude/template/${path}";
 in
@@ -22,4 +22,10 @@ in
       [ "block-cursor" ] ++ lib.optional config.programs.zellij.enable "zellij-status"
     )
   );
+
+  # The zellij prompt hook calls this instead of renaming the tab itself, so a
+  # shell sharing a tab with Claude keeps Claude's status icon.
+  programs.${shell}.initContent = lib.mkIf config.programs.zellij.enable ''
+    __dotfiles_tab_rename() { ${home}/dotfiles/modules/ai/claude/mods/zellij-status/scripts/claude-tab-status.sh; }
+  '';
 }
