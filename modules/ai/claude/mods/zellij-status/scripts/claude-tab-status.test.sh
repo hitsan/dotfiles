@@ -41,6 +41,16 @@ expect_last "a pane that no longer exists is pruned" "🔔 myproject"
 status 1 -
 expect_last "the last pane leaving restores the plain project name" "myproject"
 
+echo '[{"id":1,"is_plugin":false,"tab_id":0},{"id":2,"is_plugin":false,"tab_id":0}]' > "$FAKE_PANES"
+mkdir -p "$WORK/other"
+status 1 "⏳"
+(cd "$WORK/other" && ZELLIJ_PANE_ID=2 "$SCRIPT")
+expect_last "a shell redraw keeps a Claude pane's icon and project" "⏳ myproject"
+
+status 1 -
+(cd "$WORK/other" && ZELLIJ_PANE_ID=2 "$SCRIPT")
+expect_last "a shell redraw in a tab without Claude uses its own dir" "other"
+
 : > "$FAKE_LOG"
 (cd "$WORK/myproject" && ZELLIJ_SESSION_NAME='' ZELLIJ_PANE_ID=1 "$SCRIPT" "⏳")
 expect_last "outside zellij nothing is renamed" ""

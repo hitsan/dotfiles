@@ -28,7 +28,13 @@
             __ZELLIJ_TAB_ID=$(zellij action list-panes -t -j 2>/dev/null | jq -r --arg id "$ZELLIJ_PANE_ID" '.[] | select(.is_plugin==false and (.id|tostring)==$id) | .tab_id')
           fi
           if [[ -n "$__ZELLIJ_TAB_ID" ]]; then
-            zellij action rename-tab -t "$__ZELLIJ_TAB_ID" "$(basename "$PWD")" 2>/dev/null
+            # Another module may own the tab name (e.g. Claude's status icons); let
+            # it redraw instead of overwriting with the bare directory.
+            if (( $+functions[__dotfiles_tab_rename] )); then
+              __dotfiles_tab_rename
+            else
+              zellij action rename-tab -t "$__ZELLIJ_TAB_ID" "$(basename "$PWD")" 2>/dev/null
+            fi
           fi
         fi
       }
