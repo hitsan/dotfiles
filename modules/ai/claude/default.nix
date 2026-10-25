@@ -10,7 +10,7 @@ in
 
   programs.claude-code.enable = true;
 
-  home.file.".claude/CLAUDE.md".source = link "CLAUDE.md";
+  home.file.".claude/AGENTS.md".source = config.lib.file.mkOutOfStoreSymlink "${home}/dotfiles/modules/ai/AGENTS.md";
   home.file.".claude/settings.json".source = link "settings.json";
   home.file.".claude/keybindings.json".source = link "keybindings.json";
   home.file.".claude/statusline-command.sh".source = link "statusline-command.sh";
