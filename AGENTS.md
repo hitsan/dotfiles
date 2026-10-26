@@ -95,3 +95,7 @@ modules/<name>/    # 各ツールの設定（下記参照）
   `lib.mkIf config.programs.<依存先>.enable` で囲む。
   例: zellij-status mod の `CLAUDE_CODE_PLUGIN_DIRS` は `ai/claude/` に置き、
   `config.programs.zellij.enable` で条件付けしている。
+
+## Review guidelines
+
+- レビューコメントは日本語で書く。
