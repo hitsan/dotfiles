@@ -43,7 +43,7 @@ modules/<name>/    # 各ツールの設定（下記参照）
 | ディレクトリ | 内容 |
 |-------------|------|
 | `shell/` | zsh, zoxide, fzf, pay-respects（シェル本体と、シェル操作そのものを拡張するツール） |
-| `dev/` | just, gnumake, devbox, direnv, act |
+| `dev/` | just, gnumake, devbox, direnv, act, mutagen |
 | `cli/` | bat, eza, fd, ripgrep, jq, glow, termscp, vhs, navi（他ツールと連携しない単体コマンド） |
 | `lang/` | プログラミング言語ランタイム |
 | `editor/` | neovim |
