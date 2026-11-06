@@ -6,5 +6,6 @@
     ./devbox.nix
     ./direnv.nix
     ./act.nix
+    ./mutagen.nix
   ];
 }
