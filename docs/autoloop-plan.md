@@ -39,7 +39,7 @@ AI に長時間自律実装させるためのスキル 2 つとエージェン�
 
 ## 確認方法
 
-- [ ] `home-manager build --flake .` が通る
+- [x] `home-manager build --flake .` が通る
 - [ ] switch したあと、`/plan-backlog` と `/build-next` が補完に出る
 - [ ] `/agents` に `implementer` と `verifier` が表示される
 - [ ] 捨ててもよいリポジトリで小さな `SPEC.md` を書き、1 周させる（引き継ぎで未検証とされていた点の確認を兼ねる）
