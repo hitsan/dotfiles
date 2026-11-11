@@ -16,7 +16,7 @@ disable-model-invocation: true
 3. 選んだタスクごとに `implementer` エージェントを **並列で** 起動する（各自 worktree で動く）。渡す内容: タスク行そのまま、`SPEC.md` のパス、前回の失敗理由（あれば）。
 4. 返ってきた branch を、親が 1 件ずつ順に取り込む。
    1. `git merge --no-ff <branch>`。衝突したら `git merge --abort` して、そのタスクは失敗扱い。
-   2. プロジェクトのテストを実行する。落ちたら `git reset --hard HEAD~1` でマージを取り消し、失敗扱い。
+   2. プロジェクトのテストを実行する。落ちたら `git reset --keep HEAD~1` でマージを取り消し、失敗扱い。
    3. `verifier` エージェントにタスク行と差分（`git show HEAD`）を渡し、合否を受け取る。NG なら 2 と同様に取り消し、失敗扱い。
    4. OK なら `BACKLOG.md` で該当行を `- [x]` にして `done` へ移し、コミットする。
 5. 失敗したタスクは行末に `— fail: <理由>` を追記する。既に `fail:` がある（2 回目の失敗）なら `blocked` へ移し、理由を残す。
@@ -55,4 +55,3 @@ disable-model-invocation: true
 
 - `worktree.baseRef: "head"` で、implementer の worktree が今の HEAD（直前のラウンドで done にしたコミットを含む）から切られる。
 - hook は `tests/` 配下への編集を exit 2 で止める。
-- グローバル設定は `git reset --hard` を deny している。deny は allow より優先されるため、ループを回すときはグローバルの deny を外すか、`git reset --keep HEAD~1`（マージ直後の clean な状態なら同じ結果）で代用する。

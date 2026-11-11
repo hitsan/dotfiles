@@ -13,7 +13,7 @@ AI に長時間自律実装させるためのスキル 2 つとエージェン�
 | スキル | やること |
 | --- | --- |
 | `plan-backlog` | `SPEC.md` を読んで `BACKLOG.md` を作り、そこで止まる。各行に `test:` と `after:` を書き、不明点は質問欄に回す。 |
-| `build-next` | 依存の済んだタスクを最大 2 件選び、`implementer` を並列で起動する。親がマージしてテストし、`verifier` がレビューしてから done に移す。衝突したら `merge --abort`、テストが落ちたら `reset --hard HEAD~1`。2 回失敗したら blocked に回す。 |
+| `build-next` | 依存の済んだタスクを最大 2 件選び、`implementer` を並列で起動する。親がマージしてテストし、`verifier` がレビューしてから done に移す。衝突したら `merge --abort`、テストが落ちたら `reset --keep HEAD~1`。2 回失敗したら blocked に回す。 |
 
 `modules/ai/claude/default.nix` に `home.file.".claude/skills/<name>"` を 2 行追加する（archify と同じ方式）。
 
