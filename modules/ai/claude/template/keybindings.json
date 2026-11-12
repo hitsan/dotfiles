@@ -7,6 +7,12 @@
       "bindings": {
         "alt+c": "abovePrompt:focus"
       }
+    },
+    {
+      "context": "AbovePrompt",
+      "bindings": {
+        "alt+c": "abovePrompt:leave"
+      }
     }
   ]
 }
