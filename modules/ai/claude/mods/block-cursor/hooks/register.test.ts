@@ -104,12 +104,16 @@ test('alt+c sits right-aligned in the band until the band takes the keys', async
   expect(await band.find({ key: 'open' })).toMatchObject({ props: { label: 'alt+c' } })
 })
 
-test('l runs /autoloop to show or hide the autoloop pane', async ($, on) => {
-  const ran: string[] = []
-  on('command.run', async (_$, e) => (ran.push(e.command), { value: { text: '' } }) as never)
+test('l opens the autoloop pane, and closes it when open', async ($, on) => {
+  const calls: string[] = []
+  let open = false
+  on('ui.panes', () => ({ value: open ? [{ id: 'autoloop-nav', title: 'autoloop', isShown: true, isFocused: false, isPlaced: true }] : [] }) as never)
+  on('ui.open', (_$, e) => (calls.push(`open ${e.id}`), (open = true), { value: { isPlaced: true } }) as never)
+  on('ui.close', (_$, e) => (calls.push(`close ${e.id}`), (open = false), { value: undefined }) as never)
   const band = await openBand($, on)
 
   expect(await band.find({ key: 'nav' })).toMatchObject({ props: { hotkey: 'l' } })
   await band.press({ key: 'nav' })
-  expect(ran).toEqual(['autoloop'])
+  await band.press({ key: 'nav' })
+  expect(calls).toEqual(['open autoloop-nav', 'close autoloop-nav'])
 })

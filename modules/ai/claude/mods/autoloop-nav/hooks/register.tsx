@@ -55,8 +55,8 @@ export const register: Register = on => {
       return { text: 'autoloop パネルを閉じました。' }
     }
     await refresh($)
-    await $.ui.open({ id: PANE, title: TITLE })
-    return { text: 'autoloop パネルを開きました。' }
+    const r = await $.ui.open({ id: PANE, title: TITLE })
+    return { text: r.isPlaced ? 'autoloop パネルを開きました。' : `autoloop パネルを表示できません: ${r.reason}` }
   })
 
   on('turn.complete', async ($, e, next) => {

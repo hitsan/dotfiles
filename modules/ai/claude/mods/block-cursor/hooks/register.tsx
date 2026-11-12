@@ -58,6 +58,15 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
   $.ui.toast(r.isCopied ? 'コピーしました' : `コピー失敗: ${r.reason}`)
 }
 
+// The pane is opened here, inside the press, so it counts as the person's and is placed at any width;
+// a /autoloop run from the press is queued and loses that. autoloop-nav's ui.render draws it by its id.
+const NAV = 'autoloop-nav'
+async function toggleNav($: EngineInterface) {
+  if ((await $.ui.panes()).some(p => p.id === NAV)) return $.ui.close({ id: NAV })
+  const r = await $.ui.open({ id: NAV, title: 'autoloop' })
+  if (!r.isPlaced) $.ui.toast(`autoloop パネルを表示できません: ${r.reason}`)
+}
+
 export const register: Register = on => {
   on('ui.focus', async ($, e, next) => {
     if (e.component === 'Pane') return next(e)
@@ -124,7 +133,7 @@ export const register: Register = on => {
         </Box>
         <Box borderStyle="round" borderColor="cyan" paddingX={1} gap={2}>
           <Text dimColor>navi</Text>
-          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => $.command.run({ command: 'autoloop' }).catch(() => $.ui.toast('autoloop-nav が読み込まれていません'))} />
+          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => toggleNav($)} />
         </Box>
       </Box>
     )
