@@ -47,7 +47,7 @@ if [ -n "$rl5" ]; then
     *) reset_at=$rl5_reset ;;
   esac
   if [ -n "$reset_at" ] && [ "$reset_at" -gt "$(date +%s)" ]; then
-    out="${out} $(pct_color "$r5")↻$(date -d "@$reset_at" +%H:%M)${RESET}"
+    out="${out} $(pct_color "$r5")$(date -d "@$reset_at" +%H:%M)${RESET}"
   fi
 fi
 
