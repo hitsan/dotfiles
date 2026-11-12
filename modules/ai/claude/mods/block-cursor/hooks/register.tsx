@@ -61,8 +61,8 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 export const register: Register = on => {
   on('ui.focus', async ($, e, next) => {
     if (e.component === 'Pane') return next(e)
-    // k, j, g and y answer their hotkeys; the ring stays on the close mark.
-    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy') return {}
+    // k, j, g, y and l answer their hotkeys; the ring stays on the close mark.
+    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy' || e.element === 'nav') return {}
     await update($, isFocused, () => true)
     watchFocus($, e.requestId)
     return next(e)
@@ -119,6 +119,7 @@ export const register: Register = on => {
         <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
         <Button plain key="bottom" hotkey="g" label="⤓" onPress={() => move($, Infinity)} />
         <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
+        <Button plain key="nav" hotkey="l" label="☰" onPress={() => $.command.run({ command: 'autoloop' }).catch(() => $.ui.toast('autoloop-nav が読み込まれていません'))} />
       </Box>
     )
   })

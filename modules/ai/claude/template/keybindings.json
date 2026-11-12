@@ -5,8 +5,7 @@
     {
       "context": "Chat",
       "bindings": {
-        "alt+c": "abovePrompt:focus",
-        "alt+a": "command:autoloop"
+        "alt+c": "abovePrompt:focus"
       }
     }
   ]

@@ -103,3 +103,13 @@ test('alt+c sits right-aligned in the band until the band takes the keys', async
   expect(await band.drawn()).toMatchObject({ type: 'Box', props: { justifyContent: 'flex-end', width: 80 } })
   expect(await band.find({ key: 'open' })).toMatchObject({ props: { label: 'alt+c' } })
 })
+
+test('l runs /autoloop to show or hide the autoloop pane', async ($, on) => {
+  const ran: string[] = []
+  on('command.run', async (_$, e) => (ran.push(e.command), { value: { text: '' } }) as never)
+  const band = await openBand($, on)
+
+  expect(await band.find({ key: 'nav' })).toMatchObject({ props: { hotkey: 'l' } })
+  await band.press({ key: 'nav' })
+  expect(ran).toEqual(['autoloop'])
+})

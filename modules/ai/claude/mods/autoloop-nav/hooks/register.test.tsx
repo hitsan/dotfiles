@@ -25,8 +25,9 @@ test('ループ段階では 5 番目に ▶ が付き、次の手順が出る', 
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
   expect((await ui.find({ type: 'Text', text: /▶/ }))?.text).toContain('☐ 5. ループを回して')
-  expect((await ui.find({ type: 'Text', text: /^todo/ }))?.text).toBe('todo 3 · done 1 · blocked 0')
-  expect((await ui.find({ type: 'Text', text: /^次:/ }))?.text).toContain('/goal')
+  expect((await ui.find({ type: 'Text', text: /^タスク/ }))?.text).toBe('タスク ■■□□□□□□ 1/4 done · blocked 0')
+  expect((await ui.find({ type: 'Text', text: /今ここ/ }))?.text).toContain('5. ループを回して')
+  expect((await ui.find({ type: 'Text', text: /\/goal BACKLOG/ }))).toBeDefined()
   await ui.unmount()
 })
 
@@ -40,7 +41,8 @@ test('何も無くても全体の流れを出し、1 番目が現在地', async 
   const rows = (await ui.findAll({ type: 'Text', text: /☐/ })).map(t => t.text)
   expect(rows.length).toBe(6)
   expect(rows[0]).toContain('▶ ☐ 1. SPEC.md を書く')
-  expect((await ui.find({ type: 'Text', text: /^todo/ }))).toBeUndefined()
+  expect((await ui.find({ type: 'Text', text: /^タスク/ }))).toBeUndefined()
+  expect((await ui.find({ type: 'Text', text: /準備/ }))).toBeDefined()
   await ui.unmount()
 })
 

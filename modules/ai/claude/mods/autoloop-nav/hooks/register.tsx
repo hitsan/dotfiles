@@ -8,6 +8,12 @@ const PANE = 'autoloop-nav'
 const TITLE = 'autoloop'
 const nav = atom({ plugin: 'autoloop-nav', key: 'nav' } as const, null, { shape: 'nav-2' })
 
+const PHASES = [
+  { title: '準備', how: '/plan-backlog', items: [0, 1, 2, 3] },
+  { title: '実行', how: '新しいセッションで /goal', items: [4] },
+  { title: '振り返り', how: '/plan-backlog', items: [5] },
+]
+
 const NEXT: Record<Stage, string> = {
   spec: '/plan-backlog を呼ぶ。SPEC.md を質問しながら一緒に書きます',
   backlog: '/plan-backlog を呼ぶ。BACKLOG.md の下書きと質問の続きをします',
@@ -66,21 +72,37 @@ export const register: Register = on => {
 
     const cur = n.items.findIndex(i => !i.done)
     const { todo, done, blocked } = n.counts
+    const total = todo + done + blocked
+    const filled = total ? Math.round((done / total) * 8) : 0
     return (
-      <Box flexDirection="column">
-        {n.items.map((it, i) => (
-          <Text bold={i === cur} dimColor={it.done}>
-            {i === cur ? '▶' : ' '} {it.done ? '☑' : '☐'} {i + 1}. {it.label} — {it.how}
-          </Text>
+      <Box flexDirection="column" gap={1}>
+        {PHASES.map(ph => (
+          <Box flexDirection="column">
+            <Box gap={1}>
+              <Text bold>{ph.title}</Text>
+              <Text dimColor>{ph.how}</Text>
+            </Box>
+            {ph.items.map(i => {
+              const it = n.items[i]!
+              const here = i === cur
+              return (
+                <Text bold={here} color={here ? 'cyan' : it.done ? 'green' : undefined} dimColor={it.done}>
+                  {here ? '▶' : ' '} {it.done ? '☑' : '☐'} {i + 1}. {it.label}{here ? '  ← 今ここ' : ''}
+                </Text>
+              )
+            })}
+          </Box>
         ))}
-        <Text> </Text>
         {n.hasFiles && (
           <Text>
-            todo {todo} · done {done} · blocked {blocked}
+            タスク {'■'.repeat(filled) + '□'.repeat(8 - filled)} {done}/{total} done · blocked {blocked}
             {n.questions > 0 ? ` · 質問 ${n.questions}` : ''}
           </Text>
         )}
-        <Text color="cyan">次: {NEXT[n.stage]}</Text>
+        <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
+          <Text bold color="cyan">次にやること</Text>
+          <Text>{NEXT[n.stage]}</Text>
+        </Box>
       </Box>
     )
   })
