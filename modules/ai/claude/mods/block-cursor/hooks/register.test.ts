@@ -127,3 +127,15 @@ test('l opens the autoloop pane, and closes it when open', async ($, on) => {
   await $.command.run({ command: 'autoloop', args: '' })
   expect(calls.at(-1)).toBe('close autoloop-nav')
 })
+
+test('a opens the artifact pane and folds the band', async ($, on) => {
+  const calls: string[] = []
+  on('ui.panes', () => ({ value: [] }) as never)
+  on('ui.open', (_$, e) => (calls.push(`open ${e.id}`), { value: { isPlaced: true } }) as never)
+  const band = await openBand($, on)
+
+  expect(await band.find({ key: 'artifacts' })).toMatchObject({ props: { hotkey: 'a' } })
+  await band.press({ key: 'artifacts' })
+  expect(calls).toEqual(['open artifact-nav'])
+  expect(await band.find({ key: 'artifacts' })).toBeUndefined()
+})
