@@ -46,13 +46,8 @@ if [ -n "$rl5" ]; then
     ''|*[!0-9]*) reset_at=$(date -d "$rl5_reset" +%s 2>/dev/null) ;;
     *) reset_at=$rl5_reset ;;
   esac
-  if [ -n "$reset_at" ]; then
-    remain=$((reset_at - $(date +%s)))
-    if [ "$remain" -gt 0 ]; then
-      rh=$((remain / 3600))
-      rm=$(((remain % 3600) / 60))
-      out="${out} ${DIM}(reset $(date -d "@$reset_at" +%H:%M), ${rh}h${rm}m)${RESET}"
-    fi
+  if [ -n "$reset_at" ] && [ "$reset_at" -gt "$(date +%s)" ]; then
+    out="${out} ${DIM}↻$(date -d "@$reset_at" +%H:%M)${RESET}"
   fi
 fi
 
