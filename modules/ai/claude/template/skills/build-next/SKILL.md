@@ -39,15 +39,12 @@ disable-model-invocation: true
 ```
 BACKLOG.md の todo がすべて終わりました（done N 件、blocked M 件）。
 - git log --oneline でタスクごとのマージを確認してください
-- blocked があれば下の手順で直してください
+- blocked があれば /plan-backlog で立て直しを手伝います
 ```
 
 blocked・依存待ちで進めないとき:
 
 ```
 進められるタスクがありません（blocked N 件、依存待ち M 件）。
-1. BACKLOG.md の blocked にある理由を読む
-2. 原因に応じて SPEC.md・tests/・タスク行を直す
-3. 直したタスクを todo に戻し、行末の fail: を消してコミットする
-4. もう一度 /goal でループを始める
+新しいセッションで /plan-backlog を呼ぶと、blocked の原因の切り分けと直しを手伝います。
 ```

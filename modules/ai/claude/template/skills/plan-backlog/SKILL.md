@@ -1,22 +1,23 @@
 ---
 name: plan-backlog
-description: SPEC.md を（無ければ人間と対話して一緒に書いてから）タスク分解し、BACKLOG.md を作って止まる。実装はしない。
+description: 自律ループの準備を人間と対話しながら進める。SPEC.md・BACKLOG.md・テストを一緒に作り、設定を入れてコミットし、ループの始め方を案内して止まる。blocked の立て直しにも使う。実装はしない。
 disable-model-invocation: true
 ---
 
 # plan-backlog
 
-SPEC.md が無ければ人間と一緒に書き、それをもとに `BACKLOG.md` を作る。人間が確認・修正してから `/build-next` に渡すための下書き。
+`/build-next` のループに入る前の準備を、人間をアシストしながら進める。AI は調べて・下書きして・質問して・提案する。決めるのは人間で、各段階で OK をもらってから次へ進む。人間が途中でやめたら、そこまでの成果物を残して止まる。
 
 ## 手順
 
-0. ループ用のプロジェクト設定を入れる（後述「プロジェクト設定」）。
-1. `SPEC.md` を読む（目的・やらないこと・完了条件）。無い、雛形のまま、または完了条件が確かめられる形になっていなければ、下の「SPEC.md を一緒に書く」で仕上げてから次へ進む。
-2. 既存コードと `tests/` を読み、現状を把握する。
-3. 完了条件を、1 タスク = 1 コミットで終わる大きさに分解する。
-4. 下の形式で `BACKLOG.md` を書く（既にあれば上書きせず、差分を提案して止まる）。
-5. 各タスクの `test:` に書いたテストが既にあるか確かめ、無いものを「人間が書くテスト」として一覧にする（`tests/` は AI から編集できない）。
-6. 下の「終了時の案内」を、実際のタスク数・質問・未作成テストで埋めて伝え、止まる。コードもテストも書かない。
+1. **SPEC.md**：無い、雛形のまま、または完了条件が確かめられる形になっていなければ「SPEC.md を一緒に書く」で仕上げる。揃っていれば要点を 3 行で示して確認する。
+2. **BACKLOG.md**：既存コードと `tests/` を読み、完了条件を 1 タスク = 1 コミットの大きさに分けて下書きする。
+   - 既に `BACKLOG.md` があれば、新しく作らず、done / blocked / todo の件数と `git log` のタスクごとのマージを要約して見せる。`blocked` が残っていれば「blocked を立て直す」を行う。SPEC に追加があれば、その分のタスクだけ下書きに足す。
+3. **質問と見直し**：下書きの「質問」を 1 つずつ人間に聞き、答えを SPEC.md か BACKLOG.md に反映する。最後にタスク一覧（ID・やること・after）を表で見せ、粒度・順序の直しを受けて OK をもらう。
+4. **テスト**：各タスクの `test:` のテストが無ければ、タスクごとにテストの下書きを見せ、OK をもらってから `tests/` に書く。テストが何を確かめるかを 1 行で添える。人間が「自分で書く」と言ったものは一覧に残す。
+5. **設定**：「プロジェクト設定」を入れる。
+6. **コミット**：`SPEC.md`・`BACKLOG.md`・`tests/`・`.claude/settings.json` の差分を見せ、OK をもらってコミットする（`/build-next` は作業ツリーが clean でないと止まる）。
+7. **案内**：「終了時の案内」を実際の数字で埋めて伝え、止まる。実装コードは書かない。
 
 ## タスク行のルール
 
@@ -43,35 +44,12 @@ SPEC.md が無ければ人間と一緒に書き、それをもとに `BACKLOG.md
 - <SPEC から判断できない点>
 ```
 
-## プロジェクト設定
-
-このスキルのディレクトリにある `settings.json` を、リポジトリの `.claude/settings.json` にマージする。既存の設定は残し、`hooks.PreToolUse` は同じものが無ければ追加する（何度実行しても同じ結果になる）。
-
-```sh
-tpl=<このスキルのディレクトリ>/settings.json
-mkdir -p .claude && [ -f .claude/settings.json ] || echo '{}' > .claude/settings.json
-jq -s '.[0] as $cur | .[1] as $tpl | ($cur * ($tpl | del(.hooks))) | .hooks.PreToolUse = (($cur.hooks.PreToolUse // []) as $p | $p + ($tpl.hooks.PreToolUse | map(select(. as $h | $p | index([$h]) | not))))' \
-  .claude/settings.json "$tpl" > .claude/settings.json.tmp && mv .claude/settings.json.tmp .claude/settings.json
-```
-
-入る設定:
-- `autoContinueAtUsageLimit: true` — 使用量上限で止まっても、リセット後に自動で続ける。
-- `worktree.baseRef: "head"` — implementer の worktree を今の HEAD（直前のラウンドで done にしたコミットを含む）から切る。
-- `tests/` 配下への編集を exit 2 で止める PreToolUse hook。
-
-普段の作業に影響しないよう、グローバルではなくこのループを回すリポジトリにだけ入れる。
-
 ## SPEC.md を一緒に書く
-
-SPEC は人間の持ち物。AI は質問と下書きまでで、中身を決めるのは人間。
 
 1. 既存コード・README を読み、分かることは先に下書きへ入れておく。
 2. 埋まらない項目を 1 つずつ質問する（目的 → やらないこと → 完了条件の順。選択肢が出せるものは選択肢で聞く）。
-3. 完了条件は「テストかコマンドで確かめられる形」に言い換えて提案し、人間に確認する。曖昧な条件（「使いやすい」など）はそのまま残さない。
+3. 完了条件は「テストかコマンドで確かめられる形」に言い換えて提案する。曖昧な条件（「使いやすい」など）はそのまま残さない。
 4. 下の雛形で `SPEC.md` を書き、全文を見せて OK をもらう。直しが入れば反映して再度確認する。
-5. OK が出るまで BACKLOG.md には進まない。人間が途中でやめたら、書きかけの `SPEC.md` を残して止まる。
-
-### 雛形
 
 ```markdown
 # SPEC
@@ -86,19 +64,41 @@ SPEC は人間の持ち物。AI は質問と下書きまでで、中身を決め
 - <テストかコマンドで確かめられる形で書く。例: `cli summarize sample.csv` が tests/fixtures/expected.json と同じ出力を返す>
 ```
 
+## blocked を立て直す
+
+1. `blocked` の各行の理由と、関係する差分・テストを読み、原因を「SPEC が曖昧」「テストが誤り」「タスクが大きすぎる」「依存の漏れ」などに分けて示す。
+2. 直し方（SPEC の修正、テストの修正、タスクの分割、`after:` の追加）を提案し、OK をもらって反映する。
+3. 直したタスクを `todo` に戻し、行末の `fail:` を消す。
+
+## プロジェクト設定
+
+このスキルのディレクトリにある `settings.json` を、リポジトリの `.claude/settings.json` にマージする。既存の設定は残し、`hooks.PreToolUse` は同じものが無ければ追加する（何度実行しても同じ結果になる）。
+
+```sh
+tpl=<このスキルのディレクトリ>/settings.json
+mkdir -p .claude && [ -f .claude/settings.json ] || echo '{}' > .claude/settings.json
+jq -s '.[0] as $cur | .[1] as $tpl | ($cur * ($tpl | del(.hooks))) | .hooks.PreToolUse = (($cur.hooks.PreToolUse // []) as $p | $p + ($tpl.hooks.PreToolUse | map(select(. as $h | $p | index([$h]) | not))))' \
+  .claude/settings.json "$tpl" > .claude/settings.json.tmp && mv .claude/settings.json.tmp .claude/settings.json
+```
+
+入る設定:
+- `autoContinueAtUsageLimit: true` — 使用量上限で止まっても、リセット後に自動で続ける。
+- `worktree.baseRef: "head"` — implementer の worktree を今の HEAD（直前のラウンドで done にしたコミットを含む）から切る。
+- サブエージェント（implementer など）からの `tests/` 配下の編集を exit 2 で止める PreToolUse hook。人間と対話しているメインのセッションは止めない。
+
+普段の作業に影響しないよう、グローバルではなくこのループを回すリポジトリにだけ入れる。
+
 ## 終了時の案内
 
 ```
-BACKLOG.md を作りました（todo N 件、質問 M 件）。次にやること:
+準備ができました（todo N 件、テスト K 件追加、人間が書くテスト L 件）。
 
-1. BACKLOG.md の「質問」に答え、タスクの粒度・順序・test: を直す
-2. 次のテストを tests/ に書く（AI は tests/ を編集できません）
-   - <未作成のテスト一覧。無ければ「なし」>
-3. SPEC.md・BACKLOG.md・tests/・.claude/settings.json をコミットする（作業ツリーが clean でないと /build-next は止まります）
-4. 設定を読み直すため、新しいセッションでループを始める:
+1. 人間が書くテストがあれば書いてコミットする
+   - <一覧。無ければこの項目を省く>
+2. 設定を読み直すため、新しいセッションでループを始める:
      zellij attach -c autoloop
      claude
      /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める
    zellij の Ctrl+o は Claude Code と重なるので、Claude Code 側のキーを使うときは先に Ctrl+g でロックする
-5. 戻ってきたら BACKLOG.md の done / blocked を確認する
+3. 戻ってきたら、このセッションか新しいセッションで /plan-backlog を呼ぶと、結果の確認と blocked の立て直しを手伝います
 ```

@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' | grep -qE '(^|/)tests/' && { echo 'tests/ は編集禁止です' >&2; exit 2; } || exit 0"
+            "command": "jq -e '.agent_id and ((.tool_input.file_path // .tool_input.notebook_path // \"\") | test(\"(^|/)tests/\"))' >/dev/null && { echo 'サブエージェントは tests/ を編集できません' >&2; exit 2; } || exit 0"
           }
         ]
       }
