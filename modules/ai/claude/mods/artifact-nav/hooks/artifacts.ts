@@ -14,7 +14,7 @@ export function titleOf(html: string, path: string): string {
 }
 
 export function repoOf(repo: { root: string; remote: string | null } | null): Repo {
-  if (!repo) return { key: '', name: 'その他' }
+  if (!repo) return { key: '', name: 'other' }
   const slug = repo.remote?.match(/[:/]([^/:]+\/[^/]+?)(?:\.git)?$/)?.[1]
   return slug ? { key: slug, name: slug } : { key: repo.root, name: repo.root.split('/').pop() || repo.root }
 }

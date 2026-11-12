@@ -33,7 +33,7 @@ async function press($: EngineInterface, key: Key) {
   const r = move(await read($, cursor), key, (await read($, repos)) ?? [])
   await update($, cursor, () => r.cursor)
   // ponytail: explorer.exe opens the URL in the Windows browser (this dotfiles is WSL only); add xdg-open for other hosts.
-  if (r.open) await $.process.run(['explorer.exe', r.open], { timeoutMs: 5000 }).catch(() => $.ui.toast(`開けませんでした: ${r.open}`))
+  if (r.open) await $.process.run(['explorer.exe', r.open], { timeoutMs: 5000 }).catch(() => $.ui.toast(`Could not open ${r.open}`))
 }
 
 const fmt = (t: number) => {
@@ -45,7 +45,7 @@ const fmt = (t: number) => {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    await $.command.register({ name: 'artifact-nav', description: 'リポジトリごとの artifact 一覧パネルを開閉する' })
+    await $.command.register({ name: 'artifact-nav', description: 'Show or hide the artifacts by repository' })
     await refresh($)
     return ran
   })
@@ -66,11 +66,11 @@ export const register: Register = on => {
   on('command.run', { command: 'artifact-nav' }, async $ => {
     if ((await $.ui.panes()).some(p => p.id === PANE)) {
       await $.ui.close({ id: PANE })
-      return { text: 'artifact パネルを閉じました。' }
+      return { text: 'Closed the artifacts pane.' }
     }
     await refresh($)
     const r = await $.ui.open({ id: PANE, title: TITLE, focus: true })
-    return { text: r.isPlaced ? 'artifact パネルを開きました。' : `artifact パネルを表示できません: ${r.reason}` }
+    return { text: r.isPlaced ? 'Opened the artifacts pane.' : `Cannot show the artifacts pane: ${r.reason}` }
   })
 
   // Enter presses the ringed button, so the ring stays on ⏎ while j/k/h/l answer their hotkeys.
@@ -82,7 +82,7 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Link, Text } = $.ui.resolve(e)
     const list = (await read($, repos)) ?? []
-    if (!list.length) return <Text dimColor>まだ artifact の記録はありません。publish すると、ここにリポジトリごとに並びます。</Text>
+    if (!list.length) return <Text dimColor>No artifacts yet. Published artifacts appear here, grouped by repository.</Text>
 
     const c = await read($, cursor)
     const ri = Math.min(c.repo, list.length - 1)
@@ -94,7 +94,7 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Box>
           <Box {...frame(c.col === 0)} width={left}>
-            <Text bold>リポジトリ</Text>
+            <Text bold>repos</Text>
             {list.map((r, i) => (
               <Text bold={i === ri} color={i === ri ? 'cyan' : undefined}>
                 {i === ri ? '▶' : ' '} {r.name} ({r.artifacts.length})
@@ -117,8 +117,8 @@ export const register: Register = on => {
           <Button plain key="up" hotkey="k" label="↑" onPress={() => press($, 'k')} />
           <Button plain key="left" hotkey="h" label="←" onPress={() => press($, 'h')} />
           <Button plain key="right" hotkey="l" label="→" onPress={() => press($, 'l')} />
-          <Button plain autoFocus key="enter" label="⏎ 開く" onPress={() => press($, 'enter')} />
-          <Button plain key="close" hotkey="q" label="閉じる" onPress={() => $.command.run({ command: 'artifact-nav' }).then(() => undefined)} />
+          <Button plain autoFocus key="enter" label="⏎ open" onPress={() => press($, 'enter')} />
+          <Button plain key="close" hotkey="q" label="close" onPress={() => $.command.run({ command: 'artifact-nav' }).then(() => undefined)} />
         </Box>
       </Box>
     )

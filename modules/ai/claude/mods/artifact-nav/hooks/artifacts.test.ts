@@ -13,11 +13,11 @@ test('タイトルは <title>、無ければファイル名', () => {
   expect(titleOf('<p>x</p>', '/s/guide.html')).toBe('guide.html')
 })
 
-test('リポジトリは origin の owner/name、無ければフォルダ名、git の外は「その他」', () => {
+test('リポジトリは origin の owner/name、無ければフォルダ名、git の外は other', () => {
   expect(repoOf({ root: '/h/dotfiles', remote: 'git@github.com:hitsan/dotfiles.git' })).toEqual({ key: 'hitsan/dotfiles', name: 'hitsan/dotfiles' })
   expect(repoOf({ root: '/h/x', remote: 'https://github.com/a/b.git' })).toEqual({ key: 'a/b', name: 'a/b' })
   expect(repoOf({ root: '/h/local', remote: null })).toEqual({ key: '/h/local', name: 'local' })
-  expect(repoOf(null)).toEqual({ key: '', name: 'その他' })
+  expect(repoOf(null)).toEqual({ key: '', name: 'other' })
 })
 
 test('同じ URL は 1 件にまとめ、タイトルと時刻を更新する', () => {

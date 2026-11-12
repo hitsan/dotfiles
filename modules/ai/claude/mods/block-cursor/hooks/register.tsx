@@ -69,7 +69,7 @@ async function togglePane($: EngineInterface, id: string, title: string, focus =
   await close($)
   if ((await $.ui.panes()).some(p => p.id === id)) return $.ui.close({ id })
   const r = await $.ui.open({ id, title })
-  if (!r.isPlaced) return $.ui.toast(`${title} パネルを表示できません: ${r.reason}`)
+  if (!r.isPlaced) return $.ui.toast(`Cannot show the ${title} pane: ${r.reason}`)
   // The folding band hands the keys back to the prompt after this press, taking them from a pane focused now.
   // ponytail: re-opening the placed pane with focus 400ms later wins that race; switch to an event if the engine adds one.
   if (focus) $.clock.after(400, () => $.ui.open({ id, title, focus }).then(() => undefined))
@@ -81,7 +81,7 @@ export const register: Register = on => {
     on('command.run', { command: pane.command }, async ($, e, next) => {
       if (!(await $.ui.panes()).some(p => p.id === pane.id)) return next(e)
       await $.ui.close({ id: pane.id })
-      return { text: `${pane.title} パネルを閉じました。` }
+      return { text: `Closed the ${pane.title} pane.` }
     })
   }
 
