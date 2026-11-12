@@ -114,6 +114,9 @@ test('l opens the autoloop pane, and closes it when open', async ($, on) => {
 
   expect(await band.find({ key: 'nav' })).toMatchObject({ props: { hotkey: 'l' } })
   await band.press({ key: 'nav' })
-  await band.press({ key: 'nav' })
+  expect(calls).toEqual(['open autoloop-nav'])
+  expect(await band.find({ key: 'nav' })).toBeUndefined()
+
+  await $.command.run({ command: 'autoloop', args: '' })
   expect(calls).toEqual(['open autoloop-nav', 'close autoloop-nav'])
 })
