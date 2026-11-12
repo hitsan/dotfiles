@@ -1,0 +1,1 @@
+{ "name": "artifact-nav", "version": "0.1.0", "description": "List the artifacts each Claude Code session published", "types": "./types/index.d.ts" }

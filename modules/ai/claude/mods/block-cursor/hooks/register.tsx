@@ -59,30 +59,36 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 }
 
 // The pane is opened here, inside the press, so it counts as the person's and is placed at any width;
-// a /autoloop run from the press is queued and loses that. autoloop-nav's ui.render draws it by its id.
-const NAV = 'autoloop-nav'
-async function toggleNav($: EngineInterface) {
-  if ((await $.ui.panes()).some(p => p.id === NAV)) {
-    await $.ui.close({ id: NAV })
-  } else {
-    const r = await $.ui.open({ id: NAV, title: 'autoloop' })
-    if (!r.isPlaced) $.ui.toast(`autoloop パネルを表示できません: ${r.reason}`)
-  }
+// a slash command run from the press is queued and loses that. The owning mod's ui.render draws it by its id.
+const PANES = [
+  { id: 'autoloop-nav', title: 'autoloop', command: 'autoloop' },
+  { id: 'artifact-nav', title: 'artifacts', command: 'artifact-nav' },
+]
+// focus hands the pane the keys, for a pane whose hotkeys (artifact-nav's j/k/h/l) must answer at once.
+async function togglePane($: EngineInterface, id: string, title: string, focus = false) {
   await close($)
+  if ((await $.ui.panes()).some(p => p.id === id)) return $.ui.close({ id })
+  const r = await $.ui.open({ id, title })
+  if (!r.isPlaced) return $.ui.toast(`Cannot show the ${title} pane: ${r.reason}`)
+  // The folding band hands the keys back to the prompt after this press, taking them from a pane focused now.
+  // ponytail: re-opening the placed pane with focus 400ms later wins that race; switch to an event if the engine adds one.
+  if (focus) $.clock.after(400, () => $.ui.open({ id, title, focus }).then(() => undefined))
 }
 
 export const register: Register = on => {
-  // autoloop-nav cannot see a pane opened here, so /autoloop closes this one before it reaches autoloop-nav.
-  on('command.run', { command: 'autoloop' }, async ($, e, next) => {
-    if (!(await $.ui.panes()).some(p => p.id === NAV)) return next(e)
-    await $.ui.close({ id: NAV })
-    return { text: 'autoloop パネルを閉じました。' }
-  })
+  // The owning mod cannot see a pane opened here, so its command closes this one before it reaches that mod.
+  for (const pane of PANES) {
+    on('command.run', { command: pane.command }, async ($, e, next) => {
+      if (!(await $.ui.panes()).some(p => p.id === pane.id)) return next(e)
+      await $.ui.close({ id: pane.id })
+      return {}
+    })
+  }
 
   on('ui.focus', async ($, e, next) => {
     if (e.component === 'Pane') return next(e)
-    // k, j, g, y and l answer their hotkeys; the ring stays on the close mark.
-    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy' || e.element === 'nav') return {}
+    // k, j, g, y, l and a answer their hotkeys; the ring stays on the close mark.
+    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy' || e.element === 'nav' || e.element === 'artifacts') return {}
     await update($, isFocused, () => true)
     watchFocus($, e.requestId)
     return next(e)
@@ -144,7 +150,8 @@ export const register: Register = on => {
         </Box>
         <Box borderStyle="round" borderColor="cyan" paddingX={1} gap={2}>
           <Text dimColor>navi</Text>
-          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => toggleNav($)} />
+          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => togglePane($, 'autoloop-nav', 'autoloop')} />
+          <Button plain key="artifacts" hotkey="a" label="▤ artifacts" onPress={() => togglePane($, 'artifact-nav', 'artifacts', true)} />
         </Box>
       </Box>
     )

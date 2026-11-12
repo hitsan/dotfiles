@@ -41,12 +41,17 @@ fi
 if [ -n "$rl5" ]; then
   r5=${rl5%%.*}
   out="${out} ${DIM}·${RESET} $(pct_color "$r5")5h ${r5}%${RESET}"
-  if [ -n "$rl5_reset" ]; then
-    remain=$((rl5_reset - $(date +%s)))
+  # resets_at may be epoch seconds or an ISO 8601 string; date -d reads both.
+  case "$rl5_reset" in
+    ''|*[!0-9]*) reset_at=$(date -d "$rl5_reset" +%s 2>/dev/null) ;;
+    *) reset_at=$rl5_reset ;;
+  esac
+  if [ -n "$reset_at" ]; then
+    remain=$((reset_at - $(date +%s)))
     if [ "$remain" -gt 0 ]; then
       rh=$((remain / 3600))
       rm=$(((remain % 3600) / 60))
-      out="${out} ${DIM}(reset ${rh}h${rm}m)${RESET}"
+      out="${out} ${DIM}(reset $(date -d "@$reset_at" +%H:%M), ${rh}h${rm}m)${RESET}"
     fi
   fi
 fi
