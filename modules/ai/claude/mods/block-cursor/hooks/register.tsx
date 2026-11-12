@@ -116,15 +116,15 @@ export const register: Register = on => {
       <Box paddingX={1} gap={1} alignItems="center" width={e.props.bodyColumns}>
         <Button plain autoFocus key="close" label="●" onPress={() => close($)} />
         <Box borderStyle="round" borderColor="blue" paddingX={1} gap={2}>
-          <Text dimColor>選択・コピー</Text>
+          <Text dimColor>select</Text>
           <Button plain key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
           <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
           <Button plain key="bottom" hotkey="g" label="⤓" onPress={() => move($, Infinity)} />
           <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
         </Box>
         <Box borderStyle="round" borderColor="cyan" paddingX={1} gap={2}>
-          <Text dimColor>ループ</Text>
-          <Button plain key="nav" hotkey="l" label="☰ ナビ" onPress={() => $.command.run({ command: 'autoloop' }).catch(() => $.ui.toast('autoloop-nav が読み込まれていません'))} />
+          <Text dimColor>navi</Text>
+          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => $.command.run({ command: 'autoloop' }).catch(() => $.ui.toast('autoloop-nav が読み込まれていません'))} />
         </Box>
       </Box>
     )
