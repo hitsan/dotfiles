@@ -103,3 +103,27 @@ test('alt+c sits right-aligned in the band until the band takes the keys', async
   expect(await band.drawn()).toMatchObject({ type: 'Box', props: { justifyContent: 'flex-end', width: 80 } })
   expect(await band.find({ key: 'open' })).toMatchObject({ props: { label: 'alt+c' } })
 })
+
+test('l opens the autoloop pane, and closes it when open', async ($, on) => {
+  const calls: string[] = []
+  let open = false
+  on('ui.panes', () => ({ value: open ? [{ id: 'autoloop-nav', title: 'autoloop', isShown: true, isFocused: false, isPlaced: true }] : [] }) as never)
+  on('ui.open', (_$, e) => (calls.push(`open ${e.id}`), (open = true), { value: { isPlaced: true } }) as never)
+  on('ui.close', (_$, e) => (calls.push(`close ${e.id}`), (open = false), { value: undefined }) as never)
+  const band = await openBand($, on)
+
+  expect(await band.find({ key: 'nav' })).toMatchObject({ props: { hotkey: 'l' } })
+  await band.press({ key: 'nav' })
+  expect(calls).toEqual(['open autoloop-nav'])
+  expect(await band.find({ key: 'nav' })).toBeUndefined()
+
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  await band.press({ key: 'nav' })
+  expect(calls).toEqual(['open autoloop-nav', 'close autoloop-nav'])
+  expect(await band.find({ key: 'nav' })).toBeUndefined()
+
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  await band.press({ key: 'nav' })
+  await $.command.run({ command: 'autoloop', args: '' })
+  expect(calls.at(-1)).toBe('close autoloop-nav')
+})

@@ -58,11 +58,31 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
   $.ui.toast(r.isCopied ? 'コピーしました' : `コピー失敗: ${r.reason}`)
 }
 
+// The pane is opened here, inside the press, so it counts as the person's and is placed at any width;
+// a /autoloop run from the press is queued and loses that. autoloop-nav's ui.render draws it by its id.
+const NAV = 'autoloop-nav'
+async function toggleNav($: EngineInterface) {
+  if ((await $.ui.panes()).some(p => p.id === NAV)) {
+    await $.ui.close({ id: NAV })
+  } else {
+    const r = await $.ui.open({ id: NAV, title: 'autoloop' })
+    if (!r.isPlaced) $.ui.toast(`autoloop パネルを表示できません: ${r.reason}`)
+  }
+  await close($)
+}
+
 export const register: Register = on => {
+  // autoloop-nav cannot see a pane opened here, so /autoloop closes this one before it reaches autoloop-nav.
+  on('command.run', { command: 'autoloop' }, async ($, e, next) => {
+    if (!(await $.ui.panes()).some(p => p.id === NAV)) return next(e)
+    await $.ui.close({ id: NAV })
+    return { text: 'autoloop パネルを閉じました。' }
+  })
+
   on('ui.focus', async ($, e, next) => {
     if (e.component === 'Pane') return next(e)
-    // k, j, g and y answer their hotkeys; the ring stays on the close mark.
-    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy') return {}
+    // k, j, g, y and l answer their hotkeys; the ring stays on the close mark.
+    if (e.element === 'up' || e.element === 'down' || e.element === 'bottom' || e.element === 'copy' || e.element === 'nav') return {}
     await update($, isFocused, () => true)
     watchFocus($, e.requestId)
     return next(e)
@@ -113,12 +133,19 @@ export const register: Register = on => {
       )
     }
     return (
-      <Box paddingX={1} gap={2} width={e.props.bodyColumns}>
+      <Box paddingX={1} gap={1} alignItems="center" width={e.props.bodyColumns}>
         <Button plain autoFocus key="close" label="●" onPress={() => close($)} />
-        <Button plain key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
-        <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
-        <Button plain key="bottom" hotkey="g" label="⤓" onPress={() => move($, Infinity)} />
-        <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
+        <Box borderStyle="round" borderColor="blue" paddingX={1} gap={2}>
+          <Text dimColor>select</Text>
+          <Button plain key="up" hotkey="k" label="↑" onPress={() => move($, -1)} />
+          <Button plain key="down" hotkey="j" label="↓" onPress={() => move($, 1)} />
+          <Button plain key="bottom" hotkey="g" label="⤓" onPress={() => move($, Infinity)} />
+          <Button plain key="copy" hotkey="y" label="⧉" onPress={press => copy($, c, press.surface)} />
+        </Box>
+        <Box borderStyle="round" borderColor="cyan" paddingX={1} gap={2}>
+          <Text dimColor>navi</Text>
+          <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => toggleNav($)} />
+        </Box>
       </Box>
     )
   })

@@ -1,0 +1,19 @@
+{
+  "autoContinueAtUsageLimit": true,
+  "worktree": {
+    "baseRef": "head"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -e '.agent_id and ((.tool_input.file_path // .tool_input.notebook_path // \"\") | test(\"(^|/)tests/\"))' >/dev/null && { echo 'サブエージェントは tests/ を編集できません' >&2; exit 2; } || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
