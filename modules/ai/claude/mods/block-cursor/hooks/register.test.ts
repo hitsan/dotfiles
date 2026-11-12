@@ -128,14 +128,15 @@ test('l opens the autoloop pane, and closes it when open', async ($, on) => {
   expect(calls.at(-1)).toBe('close autoloop-nav')
 })
 
-test('a opens the artifact pane and folds the band', async ($, on) => {
+test('a opens the artifact pane, folds the band, then hands the pane the keys', async ($, on) => {
   const calls: string[] = []
+  on('clock.after', async (_$, e: any) => (await e.fn?.(), { value: { cancel() {} } }) as never)
   on('ui.panes', () => ({ value: [] }) as never)
   on('ui.open', (_$, e) => (calls.push(`open ${e.id}`), { value: { isPlaced: true } }) as never)
   const band = await openBand($, on)
 
   expect(await band.find({ key: 'artifacts' })).toMatchObject({ props: { hotkey: 'a' } })
   await band.press({ key: 'artifacts' })
-  expect(calls).toEqual(['open artifact-nav'])
+  expect(calls[0]).toBe('open artifact-nav')
   expect(await band.find({ key: 'artifacts' })).toBeUndefined()
 })

@@ -65,12 +65,14 @@ const PANES = [
   { id: 'artifact-nav', title: 'artifacts', command: 'artifact-nav' },
 ]
 // focus hands the pane the keys, for a pane whose hotkeys (artifact-nav's j/k/h/l) must answer at once.
-// The band is folded first: folding hands the keys back to the prompt, which would take them from a focused pane.
 async function togglePane($: EngineInterface, id: string, title: string, focus = false) {
   await close($)
   if ((await $.ui.panes()).some(p => p.id === id)) return $.ui.close({ id })
-  const r = await $.ui.open(focus ? { id, title, focus } : { id, title })
-  if (!r.isPlaced) $.ui.toast(`${title} パネルを表示できません: ${r.reason}`)
+  const r = await $.ui.open({ id, title })
+  if (!r.isPlaced) return $.ui.toast(`${title} パネルを表示できません: ${r.reason}`)
+  // The folding band hands the keys back to the prompt after this press, taking them from a pane focused now.
+  // ponytail: re-opening the placed pane with focus 400ms later wins that race; switch to an event if the engine adds one.
+  if (focus) $.clock.after(400, () => $.ui.open({ id, title, focus }).then(() => undefined))
 }
 
 export const register: Register = on => {
