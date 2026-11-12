@@ -1,0 +1,19 @@
+{
+  "autoContinueAtUsageLimit": true,
+  "worktree": {
+    "baseRef": "head"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' | grep -qE '(^|/)tests/' && { echo 'tests/ は編集禁止です' >&2; exit 2; } || exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

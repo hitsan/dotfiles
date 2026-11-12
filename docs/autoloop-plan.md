@@ -30,8 +30,7 @@ AI に長時間自律実装させるためのスキル 2 つとエージェン�
 
 `worktree.baseRef` と、`tests/` の編集を止める PreToolUse hook は、プロジェクトごとの設定。グローバルに入れると、普段の作業でもテストを編集できなくなる。
 
-- 代わりに `build-next` の SKILL.md に、プロジェクトの `.claude/settings.json` に書く例を載せる。
-- `autoContinueAtUsageLimit` だけは、グローバルの `settings.json` に入れてもよい（要判断）。
+- 代わりに `/plan-backlog` が最初に、同梱の `settings.json`（`autoContinueAtUsageLimit: true` を含む）をプロジェクトの `.claude/settings.json` にマージする。
 
 ## 4. zellij の Ctrl+o との衝突
 
@@ -46,4 +45,4 @@ AI に長時間自律実装させるためのスキル 2 つとエージェン�
 
 ## 要判断の点
 
-- [ ] `autoContinueAtUsageLimit` をグローバルの `settings.json` に入れるか
+- [x] `autoContinueAtUsageLimit` はループするプロジェクトにだけ `true` で入れる

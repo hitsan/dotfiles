@@ -28,30 +28,6 @@ disable-model-invocation: true
 - 親は実装しない。実装は implementer、判定は verifier に任せる。
 - `tests/` と `SPEC.md` は人間の持ち物。implementer にも親にも編集させない。
 
-## プロジェクト側の設定例
+## プロジェクト側の設定
 
-グローバルに入れると普段の作業でもテストを編集できなくなるため、このループを回すリポジトリの `.claude/settings.json` にだけ書く。
-
-```json
-{
-  "worktree": {
-    "baseRef": "head"
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' | grep -qE '(^|/)tests/' && { echo 'tests/ は編集禁止です' >&2; exit 2; } || exit 0"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-- `worktree.baseRef: "head"` で、implementer の worktree が今の HEAD（直前のラウンドで done にしたコミットを含む）から切られる。
-- hook は `tests/` 配下への編集を exit 2 で止める。
+`/plan-backlog` が `.claude/settings.json` に入れる（`autoContinueAtUsageLimit`・`worktree.baseRef`・`tests/` 編集禁止 hook）。
