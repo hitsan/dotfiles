@@ -10,9 +10,9 @@ disable-model-invocation: true
 
 ## 手順
 
-1. `SPEC.md` と `BACKLOG.md` を読む。作業ツリーが clean でなければ止まって報告する。
+1. `SPEC.md` と `BACKLOG.md` を読む。どちらかが無い、または `.claude/settings.json` に `autoContinueAtUsageLimit` が無ければ、「先に `/plan-backlog` を呼んでください」と伝えて止まる。作業ツリーが clean でなければ、コミットするよう伝えて止まる。
 2. `todo` のうち、`after:` のタスクが全部 `done` にあるものを上から最大 2 件選ぶ。
-   - 選べるものが無ければ、`todo` が空なら「完了」、そうでなければ「blocked / 依存待ちで進めない」と報告して止まる。
+   - 選べるものが無ければ、下の「終了時の案内」を伝えて止まる。
 3. 選んだタスクごとに `implementer` エージェントを **並列で** 起動する（各自 worktree で動く）。渡す内容: タスク行そのまま、`SPEC.md` のパス、前回の失敗理由（あれば）。
 4. 返ってきた branch を、親が 1 件ずつ順に取り込む。
    1. `git merge --no-ff <branch>`。衝突したら `git merge --abort` して、そのタスクは失敗扱い。
@@ -31,3 +31,23 @@ disable-model-invocation: true
 ## プロジェクト側の設定
 
 `/plan-backlog` が `.claude/settings.json` に入れる（`autoContinueAtUsageLimit`・`worktree.baseRef`・`tests/` 編集禁止 hook）。
+
+## 終了時の案内
+
+`todo` が空のとき:
+
+```
+BACKLOG.md の todo がすべて終わりました（done N 件、blocked M 件）。
+- git log --oneline でタスクごとのマージを確認してください
+- blocked があれば下の手順で直してください
+```
+
+blocked・依存待ちで進めないとき:
+
+```
+進められるタスクがありません（blocked N 件、依存待ち M 件）。
+1. BACKLOG.md の blocked にある理由を読む
+2. 原因に応じて SPEC.md・tests/・タスク行を直す
+3. 直したタスクを todo に戻し、行末の fail: を消してコミットする
+4. もう一度 /goal でループを始める
+```
