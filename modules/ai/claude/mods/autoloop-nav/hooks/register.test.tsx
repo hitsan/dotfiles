@@ -43,3 +43,16 @@ test('何も無くても全体の流れを出し、1 番目が現在地', async 
   expect((await ui.find({ type: 'Text', text: /^todo/ }))).toBeUndefined()
   await ui.unmount()
 })
+
+test('/autoloop は開いていれば閉じ、閉じていれば開く', async ($, on) => {
+  const calls: string[] = []
+  let open = false
+  on('fs.read', () => ({ deny: 'ENOENT' }))
+  on('ui.panes', () => ({ value: open ? [{ id: 'autoloop-nav', title: 'autoloop', isShown: true, isFocused: false, isPlaced: true }] : [] }))
+  on('ui.open', () => { calls.push('open'); open = true; return { value: { isPlaced: true } } })
+  on('ui.close', () => { calls.push('close'); open = false; return { value: undefined } })
+
+  await $.command.run({ command: 'autoloop', args: '' })
+  await $.command.run({ command: 'autoloop', args: '' })
+  expect(calls).toEqual(['open', 'close'])
+})

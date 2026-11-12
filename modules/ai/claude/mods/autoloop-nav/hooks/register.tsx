@@ -38,12 +38,16 @@ async function refresh($: EngineInterface): Promise<View> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    await $.command.register({ name: 'autoloop', description: 'autoloop の流れと今の段階をパネルに表示する' })
+    await $.command.register({ name: 'autoloop', description: 'autoloop の流れと今の段階を示すパネルを開閉する' })
     if ((await refresh($)).hasFiles) void $.ui.open({ id: PANE, title: TITLE })
     return ran
   })
 
   on('command.run', { command: 'autoloop' }, async $ => {
+    if ((await $.ui.panes()).some(p => p.id === PANE)) {
+      await $.ui.close({ id: PANE })
+      return { text: 'autoloop パネルを閉じました。' }
+    }
     await refresh($)
     await $.ui.open({ id: PANE, title: TITLE })
     return { text: 'autoloop パネルを開きました。' }
