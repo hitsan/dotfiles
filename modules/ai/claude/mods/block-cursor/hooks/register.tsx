@@ -64,11 +64,12 @@ const PANES = [
   { id: 'autoloop-nav', title: 'autoloop', command: 'autoloop' },
   { id: 'artifact-nav', title: 'artifacts', command: 'artifact-nav' },
 ]
-async function togglePane($: EngineInterface, id: string, title: string) {
+// focus hands the pane the keys, for a pane whose hotkeys (artifact-nav's j/k/h/l) must answer at once.
+async function togglePane($: EngineInterface, id: string, title: string, focus = false) {
   if ((await $.ui.panes()).some(p => p.id === id)) {
     await $.ui.close({ id })
   } else {
-    const r = await $.ui.open({ id, title })
+    const r = await $.ui.open(focus ? { id, title, focus } : { id, title })
     if (!r.isPlaced) $.ui.toast(`${title} パネルを表示できません: ${r.reason}`)
   }
   await close($)
@@ -150,7 +151,7 @@ export const register: Register = on => {
         <Box borderStyle="round" borderColor="cyan" paddingX={1} gap={2}>
           <Text dimColor>navi</Text>
           <Button plain key="nav" hotkey="l" label="☰ loop" onPress={() => togglePane($, 'autoloop-nav', 'autoloop')} />
-          <Button plain key="artifacts" hotkey="a" label="▤ artifacts" onPress={() => togglePane($, 'artifact-nav', 'artifacts')} />
+          <Button plain key="artifacts" hotkey="a" label="▤ artifacts" onPress={() => togglePane($, 'artifact-nav', 'artifacts', true)} />
         </Box>
       </Box>
     )

@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { extractUrl, record, titleOf, view } from './artifacts'
+import { extractUrl, move, record, repoOf, titleOf, view } from './artifacts'
 
 test('結果の中から artifact の URL を拾う', () => {
   expect(extractUrl({ text: 'Published x at https://claude.ai/artifact/TpEoqEJ (Version 2)' })).toBe('https://claude.ai/artifact/TpEoqEJ')
@@ -13,20 +13,42 @@ test('タイトルは <title>、無ければファイル名', () => {
   expect(titleOf('<p>x</p>', '/s/guide.html')).toBe('guide.html')
 })
 
-test('同じ URL は 1 件にまとめ、タイトルと時刻を更新する', () => {
-  let db = record({}, 's1', { label: 'first', cwd: '/r' }, { url: 'u1', title: 'A', at: 1 })
-  db = record(db, 's1', { label: 'ignored', cwd: '/r' }, { url: 'u1', title: 'A2', at: 2 })
-  db = record(db, 's1', { label: 'ignored', cwd: '/r' }, { url: 'u2', title: 'B', at: 3 })
-  expect(db.s1!.label).toBe('first')
-  expect(db.s1!.artifacts).toEqual([{ url: 'u1', title: 'A2', at: 2 }, { url: 'u2', title: 'B', at: 3 }])
+test('リポジトリは origin の owner/name、無ければフォルダ名、git の外は「その他」', () => {
+  expect(repoOf({ root: '/h/dotfiles', remote: 'git@github.com:hitsan/dotfiles.git' })).toEqual({ key: 'hitsan/dotfiles', name: 'hitsan/dotfiles' })
+  expect(repoOf({ root: '/h/x', remote: 'https://github.com/a/b.git' })).toEqual({ key: 'a/b', name: 'a/b' })
+  expect(repoOf({ root: '/h/local', remote: null })).toEqual({ key: '/h/local', name: 'local' })
+  expect(repoOf(null)).toEqual({ key: '', name: 'その他' })
 })
 
-test('今のセッションは新しい順、過去は最後に作った順で 10 件まで', () => {
+test('同じ URL は 1 件にまとめ、タイトルと時刻を更新する', () => {
+  let db = record({}, { key: 'r', name: 'R' }, { url: 'u1', title: 'A', at: 1 })
+  db = record(db, { key: 'r', name: 'R' }, { url: 'u1', title: 'A2', at: 2 })
+  db = record(db, { key: 'r', name: 'R' }, { url: 'u2', title: 'B', at: 3 })
+  expect(db.r!.artifacts).toEqual([{ url: 'u1', title: 'A2', at: 2 }, { url: 'u2', title: 'B', at: 3 }])
+})
+
+test('今のリポジトリが先頭、他は最後に作った順。artifact は新しい順', () => {
   let db = {}
-  for (let i = 0; i < 12; i++) db = record(db, `p${i}`, { label: `L${i}`, cwd: '/r' }, { url: `u${i}`, title: `T${i}`, at: i })
-  db = record(db, 'now', { label: 'N', cwd: '/r' }, { url: 'a', title: 'old', at: 100 })
-  db = record(db, 'now', { label: 'N', cwd: '/r' }, { url: 'b', title: 'new', at: 101 })
-  const v = view(db, 'now')
-  expect(v.current.map(a => a.title)).toEqual(['new', 'old'])
-  expect(v.past.map(s => s.id)).toEqual(['p11', 'p10', 'p9', 'p8', 'p7', 'p6', 'p5', 'p4', 'p3', 'p2'])
+  db = record(db, { key: 'a', name: 'A' }, { url: '1', title: 'a1', at: 1 })
+  db = record(db, { key: 'b', name: 'B' }, { url: '2', title: 'b1', at: 5 })
+  db = record(db, { key: 'c', name: 'C' }, { url: '3', title: 'c1', at: 3 })
+  db = record(db, { key: 'c', name: 'C' }, { url: '4', title: 'c2', at: 4 })
+  const v = view(db, 'c')
+  expect(v.map(r => r.key)).toEqual(['c', 'b', 'a'])
+  expect(v[0]!.artifacts.map(a => a.title)).toEqual(['c2', 'c1'])
+})
+
+test('j/k は列の中で動き、l で右の列へ、右の列の l は URL を開く、h で左へ', () => {
+  const repos = view(
+    record(record(record({}, { key: 'a', name: 'A' }, { url: 'u1', title: 't1', at: 1 }), { key: 'a', name: 'A' }, { url: 'u2', title: 't2', at: 2 }), { key: 'b', name: 'B' }, { url: 'u3', title: 't3', at: 0 }),
+    'a',
+  )
+  let c = { col: 0 as const, repo: 0, item: 0 }
+  expect(move(c, 'k', repos).cursor).toEqual(c)
+  expect(move(c, 'j', repos).cursor).toEqual({ col: 0, repo: 1, item: 0 })
+  const right = move(c, 'l', repos).cursor
+  expect(right).toEqual({ col: 1, repo: 0, item: 0 })
+  expect(move(right, 'j', repos).cursor).toEqual({ col: 1, repo: 0, item: 1 })
+  expect(move(move(right, 'j', repos).cursor, 'l', repos).open).toBe('u1')
+  expect(move(right, 'h', repos).cursor).toEqual({ col: 0, repo: 0, item: 0 })
 })

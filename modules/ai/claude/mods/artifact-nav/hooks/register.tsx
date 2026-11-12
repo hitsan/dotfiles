@@ -1,21 +1,21 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { Artifact, Db } from '../types'
-import { extractUrl, record, titleOf, view } from './artifacts'
+import type { Artifact, Cursor, Db } from '../types'
+import { extractUrl, move, record, repoOf, titleOf, view } from './artifacts'
+import type { Key } from './artifacts'
 
 const PANE = 'artifact-nav'
 const TITLE = 'artifacts'
-const KEY = 'db'
-const state = atom({ plugin: 'artifact-nav', key: 'view' } as const, null, { shape: 'view-1' })
-// The first prompt names the session in the list; lost on a reload, then the date and folder name it.
-let label = ''
+const KEY = 'repos'
+const repos = atom({ plugin: 'artifact-nav', key: 'repos' } as const, null, { shape: 'repos-1' })
+const cursor = atom({ plugin: 'artifact-nav', key: 'cursor' } as const, { col: 0, repo: 0, item: 0 } as Cursor, { shape: 'cursor-1' })
 
 const load = async ($: EngineInterface) => ((await $.store.get(KEY)) ?? {}) as Db
 
 async function refresh($: EngineInterface, db?: Db) {
-  const v = view(db ?? (await load($)), await $.session.id())
-  await update($, state, () => v)
+  const v = view(db ?? (await load($)), repoOf(await $.session.repo()).key)
+  await update($, repos, () => v)
 }
 
 // Artifact publishes a page; the Claude Docs connector creates a doc. Reads, lists and asset uploads are skipped.
@@ -29,6 +29,13 @@ async function describe($: EngineInterface, e: Record<string, any>): Promise<str
   if (/Claude_Docs__batch$/.test(e.tool) && e.container?.create) return e.container.create.name ?? ''
 }
 
+async function press($: EngineInterface, key: Key) {
+  const r = move(await read($, cursor), key, (await read($, repos)) ?? [])
+  await update($, cursor, () => r.cursor)
+  // ponytail: explorer.exe opens the URL in the Windows browser (this dotfiles is WSL only); add xdg-open for other hosts.
+  if (r.open) await $.process.run(['explorer.exe', r.open], { timeoutMs: 5000 }).catch(() => $.ui.toast(`開けませんでした: ${r.open}`))
+}
+
 const fmt = (t: number) => {
   const d = new Date(t)
   const p = (n: number) => String(n).padStart(2, '0')
@@ -38,14 +45,9 @@ const fmt = (t: number) => {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
-    await $.command.register({ name: 'artifact-nav', description: 'セッションごとの artifact 一覧パネルを開閉する' })
+    await $.command.register({ name: 'artifact-nav', description: 'リポジトリごとの artifact 一覧パネルを開閉する' })
     await refresh($)
     return ran
-  })
-
-  on('prompt.submit', async ($, e, next) => {
-    if (!label && !e.text.startsWith('/')) label = e.text.replace(/\s+/g, ' ').slice(0, 40)
-    return next(e)
   })
 
   on('tool.call', async ($, e, next) => {
@@ -54,9 +56,8 @@ export const register: Register = on => {
     const title = await describe($, e as Record<string, any>)
     const url = title === undefined ? undefined : extractUrl(ran)
     if (!url) return ran
-    const cwd = await $.session.cwd()
     const a: Artifact = { url, title: title || url, at: Date.now() }
-    const db = record(await load($), await $.session.id(), { label: label || fmt(a.at), cwd }, a)
+    const db = record(await load($), repoOf(await $.session.repo()), a)
     await $.store.set(KEY, db)
     await refresh($, db)
     return ran
@@ -68,39 +69,48 @@ export const register: Register = on => {
       return { text: 'artifact パネルを閉じました。' }
     }
     await refresh($)
-    const r = await $.ui.open({ id: PANE, title: TITLE })
+    const r = await $.ui.open({ id: PANE, title: TITLE, focus: true })
     return { text: r.isPlaced ? 'artifact パネルを開きました。' : `artifact パネルを表示できません: ${r.reason}` }
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Link, Text } = $.ui.resolve(e)
-    const v = await read($, state)
-    if (!v) return <Text dimColor>読み込み中…</Text>
+    const { Box, Button, Link, Text } = $.ui.resolve(e)
+    const list = (await read($, repos)) ?? []
+    if (!list.length) return <Text dimColor>まだ artifact の記録はありません。publish すると、ここにリポジトリごとに並びます。</Text>
 
-    const list = (items: Artifact[]) =>
-      items.map(a => (
-        <Box gap={1}>
-          <Text dimColor>{fmt(a.at)}</Text>
-          <Link href={a.url}>{a.title}</Link>
-        </Box>
-      ))
+    const c = await read($, cursor)
+    const ri = Math.min(c.repo, list.length - 1)
+    const items = list[ri]!.artifacts
+    const ii = Math.min(c.item, items.length - 1)
+    const left = Math.min(32, Math.floor((e.props.bodyColumns ?? 80) * 0.4))
+    const frame = (active: boolean) => ({ borderStyle: 'round', borderColor: active ? 'cyan' : 'gray', paddingX: 1, flexDirection: 'column' }) as const
     return (
-      <Box flexDirection="column" gap={1}>
-        <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
-          <Text bold color="cyan">このセッション</Text>
-          {v.current.length ? list(v.current) : <Text dimColor>まだ artifact はありません</Text>}
-        </Box>
-        <Box flexDirection="column" paddingX={1}>
-          <Text bold>過去のセッション</Text>
-          {v.past.length === 0 && <Text dimColor>記録はまだありません</Text>}
-          {v.past.map(s => (
-            <Box flexDirection="column">
-              <Text dimColor>
-                {fmt(s.at)} {s.cwd.split('/').pop()} — {s.label}
+      <Box flexDirection="column">
+        <Box>
+          <Box {...frame(c.col === 0)} width={left}>
+            <Text bold>リポジトリ</Text>
+            {list.map((r, i) => (
+              <Text bold={i === ri} color={i === ri ? 'cyan' : undefined}>
+                {i === ri ? '▶' : ' '} {r.name} ({r.artifacts.length})
               </Text>
-              {list([...s.artifacts].sort((a, b) => b.at - a.at))}
-            </Box>
-          ))}
+            ))}
+          </Box>
+          <Box {...frame(c.col === 1)} flexGrow={1}>
+            <Text bold>artifacts</Text>
+            {items.map((a, i) => (
+              <Box gap={1}>
+                <Text color={c.col === 1 && i === ii ? 'cyan' : undefined}>{c.col === 1 && i === ii ? '▶' : ' '}</Text>
+                <Link href={a.url}>{a.title}</Link>
+                <Text dimColor>{fmt(a.at)}</Text>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+        <Box gap={2} paddingX={1}>
+          <Button plain key="down" hotkey="j" label="↓" onPress={() => press($, 'j')} />
+          <Button plain key="up" hotkey="k" label="↑" onPress={() => press($, 'k')} />
+          <Button plain key="left" hotkey="h" label="← 戻る" onPress={() => press($, 'h')} />
+          <Button plain key="right" hotkey="l" label="→ 開く" onPress={() => press($, 'l')} />
         </Box>
       </Box>
     )
