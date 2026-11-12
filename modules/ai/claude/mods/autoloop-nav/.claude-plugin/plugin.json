@@ -1,0 +1,1 @@
+{ "name": "autoloop-nav", "version": "0.1.0", "description": "Show the autoloop flow (SPEC → BACKLOG → loop) and where this repo is in it", "types": "./types/index.d.ts" }
