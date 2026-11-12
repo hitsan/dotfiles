@@ -73,6 +73,12 @@ export const register: Register = on => {
     return { text: r.isPlaced ? 'artifact パネルを開きました。' : `artifact パネルを表示できません: ${r.reason}` }
   })
 
+  // Enter presses the ringed button, so the ring stays on ⏎ while j/k/h/l answer their hotkeys.
+  on('ui.focus', async ($, e, next) => {
+    if (e.requestId === PANE && ['down', 'up', 'left', 'right'].includes(e.element ?? '')) return {}
+    return next(e)
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Link, Text } = $.ui.resolve(e)
     const list = (await read($, repos)) ?? []
@@ -109,8 +115,10 @@ export const register: Register = on => {
         <Box gap={2} paddingX={1}>
           <Button plain key="down" hotkey="j" label="↓" onPress={() => press($, 'j')} />
           <Button plain key="up" hotkey="k" label="↑" onPress={() => press($, 'k')} />
-          <Button plain key="left" hotkey="h" label="← 戻る" onPress={() => press($, 'h')} />
-          <Button plain key="right" hotkey="l" label="→ 開く" onPress={() => press($, 'l')} />
+          <Button plain key="left" hotkey="h" label="←" onPress={() => press($, 'h')} />
+          <Button plain key="right" hotkey="l" label="→" onPress={() => press($, 'l')} />
+          <Button plain autoFocus key="enter" label="⏎ 開く" onPress={() => press($, 'enter')} />
+          <Button plain key="close" hotkey="q" label="閉じる" onPress={() => $.command.run({ command: 'artifact-nav' }).then(() => undefined)} />
         </Box>
       </Box>
     )

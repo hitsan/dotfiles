@@ -3,7 +3,7 @@ import type { Artifact, Cursor, Db, RepoView } from '../types'
 const URL_RE = /https:\/\/claude\.ai\/(?:code\/)?artifact\/[A-Za-z0-9_-]+/
 
 export type Repo = { key: string; name: string }
-export type Key = 'j' | 'k' | 'h' | 'l'
+export type Key = 'j' | 'k' | 'h' | 'l' | 'enter'
 
 export function extractUrl(result: unknown): string | undefined {
   return JSON.stringify(result ?? null).match(URL_RE)?.[0]
@@ -41,10 +41,11 @@ export function move(c: Cursor, key: Key, repos: RepoView[]): { cursor: Cursor; 
   const items = repos[c.repo]?.artifacts ?? []
   if (c.col === 0) {
     if (key === 'j' || key === 'k') return { cursor: { col: 0, repo: clamp(c.repo + (key === 'j' ? 1 : -1), repos.length), item: 0 } }
-    if (key === 'l' && items.length) return { cursor: { ...c, col: 1, item: 0 } }
+    if ((key === 'l' || key === 'enter') && items.length) return { cursor: { ...c, col: 1, item: 0 } }
     return { cursor: c }
   }
   if (key === 'j' || key === 'k') return { cursor: { ...c, item: clamp(c.item + (key === 'j' ? 1 : -1), items.length) } }
   if (key === 'h') return { cursor: { ...c, col: 0 } }
-  return { cursor: c, open: items[c.item]?.url }
+  if (key === 'enter') return { cursor: c, open: items[c.item]?.url }
+  return { cursor: c }
 }

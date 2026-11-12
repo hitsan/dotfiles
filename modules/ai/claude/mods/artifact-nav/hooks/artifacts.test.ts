@@ -38,7 +38,7 @@ test('今のリポジトリが先頭、他は最後に作った順。artifact �
   expect(v[0]!.artifacts.map(a => a.title)).toEqual(['c2', 'c1'])
 })
 
-test('j/k は列の中で動き、l で右の列へ、右の列の l は URL を開く、h で左へ', () => {
+test('j/k は列の中で動き、l と Enter で右の列へ、右の列の Enter は URL を開く、h で左へ', () => {
   const repos = view(
     record(record(record({}, { key: 'a', name: 'A' }, { url: 'u1', title: 't1', at: 1 }), { key: 'a', name: 'A' }, { url: 'u2', title: 't2', at: 2 }), { key: 'b', name: 'B' }, { url: 'u3', title: 't3', at: 0 }),
     'a',
@@ -49,6 +49,8 @@ test('j/k は列の中で動き、l で右の列へ、右の列の l は URL を
   const right = move(c, 'l', repos).cursor
   expect(right).toEqual({ col: 1, repo: 0, item: 0 })
   expect(move(right, 'j', repos).cursor).toEqual({ col: 1, repo: 0, item: 1 })
-  expect(move(move(right, 'j', repos).cursor, 'l', repos).open).toBe('u1')
+  expect(move(move(right, 'j', repos).cursor, 'enter', repos).open).toBe('u1')
+  expect(move(right, 'l', repos)).toEqual({ cursor: right })
+  expect(move(c, 'enter', repos).cursor).toEqual(right)
   expect(move(right, 'h', repos).cursor).toEqual({ col: 0, repo: 0, item: 0 })
 })

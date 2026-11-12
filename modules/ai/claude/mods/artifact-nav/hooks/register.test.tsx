@@ -21,7 +21,7 @@ function engine(on: any, saved: unknown[] = [], ran: string[][] = []) {
   on('session.start', (_: unknown, e: any) => ({ cwd: e.cwd }))
 }
 
-test('左にリポジトリ、右にその artifact。j で次のリポジトリ、l で右へ、もう一度 l で開く', async ($, on) => {
+test('左にリポジトリ、右にその artifact。j で次のリポジトリ、l で右へ、Enter で開く', async ($, on) => {
   const ran: string[][] = []
   engine(on, [], ran)
   await $.session.start({ cwd: '/h/dotfiles', surface: 'terminal', isInteractive: true })
@@ -35,6 +35,8 @@ test('左にリポジトリ、右にその artifact。j で次のリポジトリ
 
   await ui.press({ key: 'right' })
   await ui.press({ key: 'right' })
+  expect(ran).toEqual([])
+  await ui.press({ key: 'enter' })
   expect(JSON.stringify(ran)).toContain('https://claude.ai/artifact/B')
   await ui.unmount()
 })
@@ -47,4 +49,16 @@ test('Artifact の publish を今のリポジトリに記録する', async ($, o
   await $.session.start({ cwd: '/h/dotfiles', surface: 'terminal', isInteractive: true })
   await $.tool.call({ tool: 'Artifact', file_path: '/s/new.html' } as never)
   expect(saved.at(-1)['hitsan/dotfiles'].artifacts.map((a: any) => a.title)).toEqual(['使い方', '新しいページ'])
+})
+
+test('q で閉じる（/artifact-nav を通すので、Alt+c の帯が開いたパネルも閉じられる）', async ($, on) => {
+  const ran: string[] = []
+  engine(on)
+  on('command.run', (_: unknown, e: any) => (ran.push(e.command), { value: { text: '' } }))
+  await $.session.start({ cwd: '/h/dotfiles', surface: 'terminal', isInteractive: true })
+  const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
+  expect(await ui.find({ key: 'close' })).toMatchObject({ props: { hotkey: 'q' } })
+  await ui.press({ key: 'close' })
+  expect(ran).toEqual(['artifact-nav'])
+  await ui.unmount()
 })
