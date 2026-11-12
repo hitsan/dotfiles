@@ -66,11 +66,11 @@ export const register: Register = on => {
   on('command.run', { command: 'artifact-nav' }, async $ => {
     if ((await $.ui.panes()).some(p => p.id === PANE)) {
       await $.ui.close({ id: PANE })
-      return { text: 'Closed the artifacts pane.' }
+      return {}
     }
     await refresh($)
     const r = await $.ui.open({ id: PANE, title: TITLE, focus: true })
-    return { text: r.isPlaced ? 'Opened the artifacts pane.' : `Cannot show the artifacts pane: ${r.reason}` }
+    return r.isPlaced ? {} : { text: `Cannot show the artifacts pane: ${r.reason}` }
   })
 
   // Enter presses the ringed button, so the ring stays on ⏎ while j/k/h/l answer their hotkeys.

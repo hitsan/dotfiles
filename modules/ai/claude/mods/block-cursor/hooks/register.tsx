@@ -81,7 +81,7 @@ export const register: Register = on => {
     on('command.run', { command: pane.command }, async ($, e, next) => {
       if (!(await $.ui.panes()).some(p => p.id === pane.id)) return next(e)
       await $.ui.close({ id: pane.id })
-      return { text: `Closed the ${pane.title} pane.` }
+      return {}
     })
   }
 

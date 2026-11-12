@@ -52,11 +52,11 @@ export const register: Register = on => {
   on('command.run', { command: 'autoloop' }, async $ => {
     if ((await $.ui.panes()).some(p => p.id === PANE)) {
       await $.ui.close({ id: PANE })
-      return { text: 'autoloop パネルを閉じました。' }
+      return {}
     }
     await refresh($)
     const r = await $.ui.open({ id: PANE, title: TITLE })
-    return { text: r.isPlaced ? 'autoloop パネルを開きました。' : `autoloop パネルを表示できません: ${r.reason}` }
+    return r.isPlaced ? {} : { text: `autoloop パネルを表示できません: ${r.reason}` }
   })
 
   on('turn.complete', async ($, e, next) => {
