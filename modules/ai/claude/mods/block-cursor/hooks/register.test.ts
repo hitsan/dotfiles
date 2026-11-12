@@ -117,6 +117,13 @@ test('l opens the autoloop pane, and closes it when open', async ($, on) => {
   expect(calls).toEqual(['open autoloop-nav'])
   expect(await band.find({ key: 'nav' })).toBeUndefined()
 
-  await $.command.run({ command: 'autoloop', args: '' })
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  await band.press({ key: 'nav' })
   expect(calls).toEqual(['open autoloop-nav', 'close autoloop-nav'])
+  expect(await band.find({ key: 'nav' })).toBeUndefined()
+
+  await $.ui.focus({ requestId: 'band', key: 'open' } as never)
+  await band.press({ key: 'nav' })
+  await $.command.run({ command: 'autoloop', args: '' })
+  expect(calls.at(-1)).toBe('close autoloop-nav')
 })

@@ -62,9 +62,12 @@ async function copy($: EngineInterface, c: Cursor | null, surface: Parameters<En
 // a /autoloop run from the press is queued and loses that. autoloop-nav's ui.render draws it by its id.
 const NAV = 'autoloop-nav'
 async function toggleNav($: EngineInterface) {
-  if ((await $.ui.panes()).some(p => p.id === NAV)) return $.ui.close({ id: NAV })
-  const r = await $.ui.open({ id: NAV, title: 'autoloop' })
-  if (!r.isPlaced) $.ui.toast(`autoloop パネルを表示できません: ${r.reason}`)
+  if ((await $.ui.panes()).some(p => p.id === NAV)) {
+    await $.ui.close({ id: NAV })
+  } else {
+    const r = await $.ui.open({ id: NAV, title: 'autoloop' })
+    if (!r.isPlaced) $.ui.toast(`autoloop パネルを表示できません: ${r.reason}`)
+  }
   await close($)
 }
 
