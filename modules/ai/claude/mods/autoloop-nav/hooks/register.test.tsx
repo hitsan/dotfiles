@@ -13,7 +13,7 @@ const FILES: Record<string, string> = {
   '.claude/settings.json': '{"autoContinueAtUsageLimit": true}',
 }
 
-test('ループ段階では 4 番目に ▶ が付き、次の手順が出る', async ($, on) => {
+test('ループ段階では 5 番目に ▶ が付き、次の手順が出る', async ($, on) => {
   on('fs.read', (_, e) => {
     const key = Object.keys(FILES).find(k => e.path.endsWith(k))
     return key ? { value: FILES[key] } : { deny: 'ENOENT' }
@@ -24,14 +24,22 @@ test('ループ段階では 4 番目に ▶ が付き、次の手順が出る', 
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /▶/ }))?.text).toContain('4. ループを回す')
+  expect((await ui.find({ type: 'Text', text: /▶/ }))?.text).toContain('☐ 5. ループを回して')
   expect((await ui.find({ type: 'Text', text: /^todo/ }))?.text).toBe('todo 3 · done 1 · blocked 0')
   expect((await ui.find({ type: 'Text', text: /^次:/ }))?.text).toContain('/goal')
   await ui.unmount()
 })
 
-test('SPEC も BACKLOG も無ければ始め方を出す', async $ => {
+test('何も無くても全体の流れを出し、1 番目が現在地', async ($, on) => {
+  on('fs.read', () => ({ deny: 'ENOENT' }))
+  on('command.register', () => ({ value: { command: 'autoloop' } }))
+  on('session.start', (_, e) => ({ cwd: e.cwd }))
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text' }))?.text).toContain('/plan-backlog')
+  const rows = (await ui.findAll({ type: 'Text', text: /☐/ })).map(t => t.text)
+  expect(rows.length).toBe(6)
+  expect(rows[0]).toContain('▶ ☐ 1. SPEC.md を書く')
+  expect((await ui.find({ type: 'Text', text: /^todo/ }))).toBeUndefined()
   await ui.unmount()
 })

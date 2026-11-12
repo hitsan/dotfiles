@@ -1,20 +1,12 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { navigate } from './stage'
-import type { Nav, Stage } from '../types'
+import { checklist, navigate } from './stage'
+import type { Stage, View } from '../types'
 
 const PANE = 'autoloop-nav'
 const TITLE = 'autoloop'
-const nav = atom({ plugin: 'autoloop-nav', key: 'nav' } as const, null, { shape: 'nav-1' })
-
-const STEPS: { label: string; how: string; at: Stage[] }[] = [
-  { label: 'SPEC.md を一緒に書く', how: '/plan-backlog', at: ['spec'] },
-  { label: 'BACKLOG.md を作り、質問に答える', how: '/plan-backlog', at: ['backlog'] },
-  { label: 'テスト・設定・コミット', how: '/plan-backlog', at: ['settings'] },
-  { label: 'ループを回す', how: '新しいセッションで /goal', at: ['loop'] },
-  { label: '結果確認・blocked の立て直し', how: '/plan-backlog', at: ['rebuild', 'done'] },
-]
+const nav = atom({ plugin: 'autoloop-nav', key: 'nav' } as const, null, { shape: 'nav-2' })
 
 const NEXT: Record<Stage, string> = {
   spec: '/plan-backlog を呼ぶ。SPEC.md を質問しながら一緒に書きます',
@@ -33,20 +25,21 @@ const readOr = async ($: EngineInterface, path: string) => {
   }
 }
 
-async function refresh($: EngineInterface): Promise<Nav | null> {
+async function refresh($: EngineInterface): Promise<View> {
   const [spec, backlog, settings] = await Promise.all(
     ['SPEC.md', 'BACKLOG.md', '.claude/settings.json'].map(p => readOr($, p)),
   )
-  const next = spec || backlog ? navigate({ spec, backlog, settings }) : null
-  await update($, nav, () => next)
-  return next
+  const files = { spec, backlog, settings }
+  const view = { ...navigate(files), items: checklist(files), hasFiles: !!(spec || backlog) }
+  await update($, nav, () => view)
+  return view
 }
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const ran = await next(e)
     await $.command.register({ name: 'autoloop', description: 'autoloop の流れと今の段階をパネルに表示する' })
-    if (await refresh($)) void $.ui.open({ id: PANE, title: TITLE })
+    if ((await refresh($)).hasFiles) void $.ui.open({ id: PANE, title: TITLE })
     return ran
   })
 
@@ -65,25 +58,24 @@ export const register: Register = on => {
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text } = $.ui.resolve(e)
     const n = await read($, nav)
-    if (!n) return <Text dimColor>SPEC.md も BACKLOG.md もありません。/plan-backlog で始められます。</Text>
+    if (!n) return <Text dimColor>読み込み中…</Text>
 
-    const cur = STEPS.findIndex(s => s.at.includes(n.stage))
+    const cur = n.items.findIndex(i => !i.done)
     const { todo, done, blocked } = n.counts
     return (
       <Box flexDirection="column">
-        {STEPS.map((s, i) => {
-          const mark = i < cur || n.stage === 'done' ? '✓' : i === cur ? '▶' : ' '
-          return (
-            <Text bold={i === cur} dimColor={i !== cur}>
-              {mark} {i + 1}. {s.label} — {s.how}
-            </Text>
-          )
-        })}
+        {n.items.map((it, i) => (
+          <Text bold={i === cur} dimColor={it.done}>
+            {i === cur ? '▶' : ' '} {it.done ? '☑' : '☐'} {i + 1}. {it.label} — {it.how}
+          </Text>
+        ))}
         <Text> </Text>
-        <Text>
-          todo {todo} · done {done} · blocked {blocked}
-          {n.questions > 0 ? ` · 質問 ${n.questions}` : ''}
-        </Text>
+        {n.hasFiles && (
+          <Text>
+            todo {todo} · done {done} · blocked {blocked}
+            {n.questions > 0 ? ` · 質問 ${n.questions}` : ''}
+          </Text>
+        )}
         <Text color="cyan">次: {NEXT[n.stage]}</Text>
       </Box>
     )

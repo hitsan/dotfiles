@@ -1,4 +1,4 @@
-import type { Nav, Stage } from '../types'
+import type { Item, Nav, Stage } from '../types'
 
 export type Files = { spec?: string; backlog?: string; settings?: string }
 
@@ -24,4 +24,18 @@ export function navigate(f: Files): Nav {
   if (counts.blocked > 0) return nav('rebuild')
   if (counts.todo > 0) return nav('loop')
   return nav('done')
+}
+
+export function checklist(f: Files): Item[] {
+  const { stage } = navigate(f)
+  const past = (...s: Stage[]) => !s.includes(stage)
+  const fin = stage === 'done'
+  return [
+    { label: 'SPEC.md を書く（目的・やらないこと・完了条件）', how: '/plan-backlog', done: past('spec') },
+    { label: 'BACKLOG.md を作る', how: '/plan-backlog', done: past('spec') && !!f.backlog },
+    { label: '質問に答え、テストを用意する', how: '/plan-backlog', done: past('spec', 'backlog') },
+    { label: 'ループ用の設定を入れてコミット', how: '/plan-backlog', done: past('spec', 'backlog', 'settings') },
+    { label: 'ループを回して todo を空にする', how: '新しいセッションで /goal', done: fin },
+    { label: '結果を確認し、blocked を立て直す', how: '/plan-backlog', done: fin },
+  ]
 }

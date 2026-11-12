@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { navigate } from './stage'
+import { checklist, navigate } from './stage'
 
 const SPEC = '# SPEC\n\n## 目的\nCSV を集計する\n\n## やらないこと\n- GUI\n\n## 完了条件\n- `cli x` が通る\n'
 const BACKLOG = (todo: number, done: number, blocked: number, q = '') =>
@@ -44,4 +44,24 @@ test('blocked があれば立て直し段階', () => {
 
 test('todo も blocked も無ければ完了', () => {
   expect(navigate({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS }).stage).toBe('done')
+})
+
+test('何も無ければ全項目が未完了で、1 番目が現在地', () => {
+  const list = checklist({})
+  expect(list.map(i => i.done)).toEqual([false, false, false, false, false, false])
+})
+
+test('ループ段階では 1〜4 が完了', () => {
+  const list = checklist({ spec: SPEC, backlog: BACKLOG(3, 1, 0), settings: SETTINGS })
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false])
+})
+
+test('全部 done なら全項目が完了', () => {
+  const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS })
+  expect(list.every(i => i.done)).toBe(true)
+})
+
+test('blocked があればループは完了扱いにしない', () => {
+  const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 1, 2), settings: SETTINGS })
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false])
 })
