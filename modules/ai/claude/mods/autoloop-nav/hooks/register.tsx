@@ -9,18 +9,18 @@ const TITLE = 'autoloop'
 const nav = atom({ plugin: 'autoloop-nav', key: 'nav' } as const, null, { shape: 'nav-2' })
 
 const PHASES = [
-  { title: '準備', how: '/plan-backlog', items: [0, 1, 2, 3] },
+  { title: '準備', how: '/poc', items: [0, 1, 2, 3] },
   { title: '実行', how: '新しいセッションで /goal', items: [4] },
-  { title: '振り返り', how: '/plan-backlog', items: [5] },
+  { title: '振り返り', how: '/poc', items: [5] },
 ]
 
 const NEXT: Record<Stage, string> = {
-  spec: '/plan-backlog を呼ぶ。SPEC.md を質問しながら一緒に書きます',
-  backlog: '/plan-backlog を呼ぶ。BACKLOG.md の下書きと質問の続きをします',
-  settings: '/plan-backlog を呼ぶ。テスト・設定・コミットを仕上げます',
+  spec: '/poc を呼ぶ。要求を聞き、デモで確かめてから SPEC.md を一緒に書きます',
+  backlog: '/poc を呼ぶ。BACKLOG.md の下書きと質問の続きをします',
+  settings: '/poc を呼ぶ。テスト・設定・コミットを仕上げます',
   loop: '新しいセッションで /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める',
-  rebuild: '/plan-backlog を呼ぶ。blocked の原因の切り分けと直しを手伝います',
-  done: 'すべて done。git log で結果を確認する。追加があれば SPEC.md に足して /plan-backlog',
+  rebuild: '/poc を呼ぶ。blocked の原因の切り分けと直しを手伝います',
+  done: 'すべて done。git log で結果を確認する。追加があれば /poc で要求から伝える',
 }
 
 const readOr = async ($: EngineInterface, path: string) => {

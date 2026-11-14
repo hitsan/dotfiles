@@ -16,7 +16,6 @@ in
   home.file.".claude/statusline-command.sh".source = link "statusline-command.sh";
   home.file.".claude/agents".source = link "agents";
   home.file.".claude/skills/archify".source = link "skills/archify";
-  home.file.".claude/skills/plan-backlog".source = link "skills/plan-backlog";
   home.file.".claude/skills/build-next".source = link "skills/build-next";
   home.file.".claude/skills/poc".source = link "skills/poc";
 

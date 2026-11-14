@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 ## 手順
 
-1. `SPEC.md` と `BACKLOG.md` を読む。どちらかが無い、または `.claude/settings.json` に `autoContinueAtUsageLimit` が無ければ、「先に `/plan-backlog` を呼んでください」と伝えて止まる。作業ツリーが clean でなければ、コミットするよう伝えて止まる。
+1. `SPEC.md` と `BACKLOG.md` を読む。どちらかが無い、または `.claude/settings.json` に `autoContinueAtUsageLimit` が無ければ、「先に `/poc` を呼んでください」と伝えて止まる。作業ツリーが clean でなければ、コミットするよう伝えて止まる。
 2. `todo` のうち、`after:` のタスクが全部 `done` にあるものを上から最大 2 件選ぶ。
    - 選べるものが無ければ、下の「終了時の案内」を伝えて止まる。
 3. 選んだタスクごとに `implementer` エージェントを **並列で** 起動する（各自 worktree で動く）。渡す内容: タスク行そのまま、`SPEC.md` のパス、前回の失敗理由（あれば）。
@@ -30,7 +30,7 @@ disable-model-invocation: true
 
 ## プロジェクト側の設定
 
-`/plan-backlog` が `.claude/settings.json` に入れる（`autoContinueAtUsageLimit`・`worktree.baseRef`・`tests/` 編集禁止 hook）。
+`/poc` が `.claude/settings.json` に入れる（`autoContinueAtUsageLimit`・`worktree.baseRef`・`tests/` 編集禁止 hook）。
 
 ## 終了時の案内
 
@@ -39,12 +39,12 @@ disable-model-invocation: true
 ```
 BACKLOG.md の todo がすべて終わりました（done N 件、blocked M 件）。
 - git log --oneline でタスクごとのマージを確認してください
-- blocked があれば /plan-backlog で立て直しを手伝います
+- blocked があれば /poc で立て直しを手伝います
 ```
 
 blocked・依存待ちで進めないとき:
 
 ```
 進められるタスクがありません（blocked N 件、依存待ち M 件）。
-新しいセッションで /plan-backlog を呼ぶと、blocked の原因の切り分けと直しを手伝います。
+新しいセッションで /poc を呼ぶと、blocked の原因の切り分けと直しを手伝います。
 ```
