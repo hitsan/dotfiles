@@ -42,7 +42,8 @@
     "draw-io@claude-drawio-skill": true,
     "ponytail@ponytail": true,
     "typesafe@typesafe-ai": true,
-    "natural-japanese@natural-japanese": true
+    "natural-japanese@natural-japanese": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-drawio-skill": {
