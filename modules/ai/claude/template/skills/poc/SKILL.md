@@ -1,6 +1,6 @@
 ---
 name: poc
-description: 要求を聞き、決め打ちの HTML デモで操作を体験してもらってから、SPEC.md・BACKLOG.md・テストを一緒に作り、/build-next のループの始め方を案内して止まる。blocked の立て直しにも使う。実装はしない。
+description: 要求を聞き、決め打ちの HTML デモで操作を体験してもらってから、SPEC.md・BACKLOG.md・テストを一緒に作り、/build-next のループの始め方を案内して止まる。実装はしない。
 disable-model-invocation: true
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 要求 → デモ → 要件 の順で、`/build-next` のループに入る準備を人間と進める。言葉で要件を詰める前に、決め打ちのデモで操作を体験してもらう。要件を受け取ったら、SPEC.md と BACKLOG.md は確認を挟まずに AI が書く。人間が途中でやめたら、そこまでの成果物を残して止まる。
 
-既に `BACKLOG.md` があれば、1〜2 を飛ばして「既に BACKLOG.md があるとき」から始める。
+既に `SPEC.md`・`BACKLOG.md` があれば、新しい要求の分だけ足す（手順は同じ）。BACKLOG.md の todo にタスクを足したら、レビューし直すため `REVIEW.md` があれば消す。
 
 ## 手順
 
@@ -84,19 +84,6 @@ disable-model-invocation: true
 - <SPEC から判断できない点>
 ```
 
-## 既に BACKLOG.md があるとき
-
-1. done / blocked / todo の件数と `git log` のタスクごとのマージを要約して見せる。
-2. `blocked` が残っていれば「blocked を立て直す」を行う。
-3. 新しい要求があれば手順 1 から進め、SPEC.md に足した分のタスクだけ BACKLOG.md に足す。
-4. 手順 3 の 3 以降（見せる → テスト → 設定 → コミット）を行い、案内して止まる。
-
-## blocked を立て直す
-
-1. `blocked` の各行の理由と、関係する差分・テストを読み、原因を「SPEC が曖昧」「テストが誤り」「タスクが大きすぎる」「依存の漏れ」などに分けて示す。
-2. 直し方（SPEC の修正、テストの修正、タスクの分割、`after:` の追加）を提案し、OK をもらって反映する。動作の認識がずれていそうなら、該当シナリオのデモを作って確かめる。
-3. 直したタスクを `todo` に戻し、行末の `fail:` を消す。
-
 ## プロジェクト設定
 
 このスキルのディレクトリにある `settings.json` を、リポジトリの `.claude/settings.json` にマージする。既存の設定は残し、`hooks.PreToolUse` は同じものが無ければ追加する（何度実行しても同じ結果になる）。
@@ -127,5 +114,5 @@ jq -s '.[0] as $cur | .[1] as $tpl | ($cur * ($tpl | del(.hooks))) | .hooks.PreT
      claude
      /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める
    zellij の Ctrl+o は Claude Code と重なるので、Claude Code 側のキーを使うときは先に Ctrl+g でロックする
-3. 戻ってきたら、このセッションか新しいセッションで /poc を呼ぶと、結果の確認と blocked の立て直しを手伝います
+3. 戻ってきたら /review でできあがりをデモ・SPEC と見比べ、/retro で振り返る
 ```

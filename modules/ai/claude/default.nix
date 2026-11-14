@@ -18,6 +18,8 @@ in
   home.file.".claude/skills/archify".source = link "skills/archify";
   home.file.".claude/skills/build-next".source = link "skills/build-next";
   home.file.".claude/skills/poc".source = link "skills/poc";
+  home.file.".claude/skills/review".source = link "skills/review";
+  home.file.".claude/skills/retro".source = link "skills/retro";
 
   home.sessionVariables.CLAUDE_CODE_PLUGIN_DIRS = lib.concatStringsSep ":" (
     map (mod: "${home}/dotfiles/modules/ai/claude/mods/${mod}") (

@@ -11,7 +11,8 @@ const nav = atom({ plugin: 'autoloop-nav', key: 'nav' } as const, null, { shape:
 const PHASES = [
   { title: '準備', how: '/poc', items: [0, 1, 2, 3] },
   { title: '実行', how: '新しいセッションで /goal', items: [4] },
-  { title: '振り返り', how: '/poc', items: [5] },
+  { title: 'レビュー', how: '/review', items: [5] },
+  { title: '振り返り', how: '/retro', items: [6] },
 ]
 
 const NEXT: Record<Stage, string> = {
@@ -19,8 +20,9 @@ const NEXT: Record<Stage, string> = {
   backlog: '/poc を呼ぶ。BACKLOG.md の下書きと質問の続きをします',
   settings: '/poc を呼ぶ。テスト・設定・コミットを仕上げます',
   loop: '新しいセッションで /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める',
-  rebuild: '/poc を呼ぶ。blocked の原因の切り分けと直しを手伝います',
-  done: 'すべて done。git log で結果を確認する。追加があれば /poc で要求から伝える',
+  review: '/review を呼ぶ。デモのシナリオを実装で動かし、SPEC の完了条件を満たすか確かめます',
+  rebuild: '/retro を呼ぶ。結果の要約と blocked の原因の切り分け・直しを手伝います',
+  done: '/retro を呼ぶ。結果を振り返ります。追加があれば /poc で要求から伝える',
 }
 
 const readOr = async ($: EngineInterface, path: string) => {
@@ -32,10 +34,10 @@ const readOr = async ($: EngineInterface, path: string) => {
 }
 
 async function refresh($: EngineInterface): Promise<View> {
-  const [spec, backlog, settings] = await Promise.all(
-    ['SPEC.md', 'BACKLOG.md', '.claude/settings.json'].map(p => readOr($, p)),
+  const [spec, backlog, settings, review] = await Promise.all(
+    ['SPEC.md', 'BACKLOG.md', '.claude/settings.json', 'REVIEW.md'].map(p => readOr($, p)),
   )
-  const files = { spec, backlog, settings }
+  const files = { spec, backlog, settings, review }
   const view = { ...navigate(files), items: checklist(files), hasFiles: !!(spec || backlog) }
   await update($, nav, () => view)
   return view

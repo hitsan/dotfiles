@@ -1,4 +1,4 @@
-export type Stage = 'spec' | 'backlog' | 'settings' | 'loop' | 'rebuild' | 'done'
+export type Stage = 'spec' | 'backlog' | 'settings' | 'loop' | 'review' | 'rebuild' | 'done'
 export type Counts = { todo: number; done: number; blocked: number }
 export type Item = { label: string; how: string; done: boolean }
 export type Nav = { stage: Stage; counts: Counts; questions: number }

@@ -11,6 +11,7 @@ const BACKLOG = (todo: number, done: number, blocked: number, q = '') =>
     '', '## 質問', q,
   ].join('\n')
 const SETTINGS = '{"autoContinueAtUsageLimit": true}'
+const REVIEW = '# REVIEW\n\n- 2026-11-14 OK\n'
 
 test('SPEC.md が無ければ SPEC 段階', () => {
   expect(navigate({}).stage).toBe('spec')
@@ -38,30 +39,48 @@ test('todo があればループ段階で件数を持つ', () => {
   expect(n.counts).toEqual({ todo: 3, done: 1, blocked: 0 })
 })
 
-test('blocked があれば立て直し段階', () => {
-  expect(navigate({ spec: SPEC, backlog: BACKLOG(1, 1, 2), settings: SETTINGS }).stage).toBe('rebuild')
+test('blocked があり未レビューならレビュー段階', () => {
+  expect(navigate({ spec: SPEC, backlog: BACKLOG(1, 1, 2), settings: SETTINGS }).stage).toBe('review')
 })
 
-test('todo も blocked も無ければ完了', () => {
-  expect(navigate({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS }).stage).toBe('done')
+test('blocked がありレビュー済みなら立て直し段階', () => {
+  expect(navigate({ spec: SPEC, backlog: BACKLOG(1, 1, 2), settings: SETTINGS, review: REVIEW }).stage).toBe('rebuild')
+})
+
+test('todo も blocked も無く未レビューならレビュー段階', () => {
+  expect(navigate({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS }).stage).toBe('review')
+})
+
+test('todo も blocked も無くレビュー済みなら完了', () => {
+  expect(navigate({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS, review: REVIEW }).stage).toBe('done')
 })
 
 test('何も無ければ全項目が未完了で、1 番目が現在地', () => {
   const list = checklist({})
-  expect(list.map(i => i.done)).toEqual([false, false, false, false, false, false])
+  expect(list.map(i => i.done)).toEqual([false, false, false, false, false, false, false])
 })
 
 test('ループ段階では 1〜4 が完了', () => {
   const list = checklist({ spec: SPEC, backlog: BACKLOG(3, 1, 0), settings: SETTINGS })
-  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false])
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false, false])
 })
 
-test('全部 done なら全項目が完了', () => {
+test('レビュー段階では 1〜5 が完了', () => {
   const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS })
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, true, false, false])
+})
+
+test('全部 done でレビュー済みなら全項目が完了', () => {
+  const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 3, 0), settings: SETTINGS, review: REVIEW })
   expect(list.every(i => i.done)).toBe(true)
 })
 
 test('blocked があればループは完了扱いにしない', () => {
   const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 1, 2), settings: SETTINGS })
-  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false])
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, false, false])
+})
+
+test('blocked がありレビュー済みならレビューまで完了', () => {
+  const list = checklist({ spec: SPEC, backlog: BACKLOG(0, 1, 2), settings: SETTINGS, review: REVIEW })
+  expect(list.map(i => i.done)).toEqual([true, true, true, true, false, true, false])
 })

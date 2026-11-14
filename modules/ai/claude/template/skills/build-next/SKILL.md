@@ -39,12 +39,12 @@ disable-model-invocation: true
 ```
 BACKLOG.md の todo がすべて終わりました（done N 件、blocked M 件）。
 - git log --oneline でタスクごとのマージを確認してください
-- blocked があれば /poc で立て直しを手伝います
+- /review でできあがりをデモ・SPEC と見比べ、/retro で振り返ってください
 ```
 
 blocked・依存待ちで進めないとき:
 
 ```
 進められるタスクがありません（blocked N 件、依存待ち M 件）。
-新しいセッションで /poc を呼ぶと、blocked の原因の切り分けと直しを手伝います。
+新しいセッションで /review、続けて /retro を呼ぶと、できあがりの確認と blocked の立て直しを手伝います。
 ```
