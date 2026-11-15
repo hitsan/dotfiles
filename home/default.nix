@@ -1,4 +1,4 @@
-{ user, home, ... }:
+{ pkgs, user, home, ... }:
 {
   home.username = user;
   home.homeDirectory = home;
@@ -17,6 +17,7 @@
   programs = {
     ssh = {
       enable = true;
+      package = pkgs.openssh_gssapi;
       enableDefaultConfig = false;
       settings."*" = {
         AddKeysToAgent = "yes";
