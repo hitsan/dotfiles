@@ -36,8 +36,8 @@ export function checklist(f: Files): Item[] {
     { label: 'BACKLOG.md を作る', how: '/poc', done: past('spec') && !!f.backlog },
     { label: '質問に答え、テストを用意する', how: '/poc', done: past('spec', 'backlog') },
     { label: 'ループ用の設定を入れてコミット', how: '/poc', done: past('spec', 'backlog', 'settings') },
-    { label: 'ループを回して todo を空にする', how: '新しいセッションで /goal', done: ready && counts.todo === 0 && counts.blocked === 0 },
-    { label: 'できあがりをデモ・SPEC と見比べる', how: '/review', done: ready && !!f.review },
+    { label: 'ループを回し、PR を少しずつレビューする', how: '新しいセッションで /goal', done: ready && counts.todo === 0 && counts.blocked === 0 },
+    { label: '残りの PR と完了条件を確かめる', how: '/review', done: ready && !!f.review },
     { label: '結果を振り返り、blocked を立て直す', how: '/retro', done: fin },
   ]
 }
