@@ -1,3 +1,4 @@
 .tags
 result
 .claude/worktrees/
+node_modules/
