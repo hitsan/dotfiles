@@ -24,9 +24,9 @@ test('ループ段階では 5 番目に ▶ が付き、次の手順が出る', 
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /▶/ }))?.text).toContain('☐ 5. ループを回して')
+  expect((await ui.find({ type: 'Text', text: /▶/ }))?.text).toContain('☐ 5. ループを回し、PR を')
   expect((await ui.find({ type: 'Text', text: /^タスク/ }))?.text).toBe('タスク ■■□□□□□□ 1/4 done · blocked 0')
-  expect((await ui.find({ type: 'Text', text: /今ここ/ }))?.text).toContain('5. ループを回して')
+  expect((await ui.find({ type: 'Text', text: /今ここ/ }))?.text).toContain('5. ループを回し、PR を')
   expect((await ui.find({ type: 'Text', text: /\/goal BACKLOG/ }))).toBeDefined()
   await ui.unmount()
 })
@@ -62,7 +62,7 @@ test('todo が空で REVIEW.md があれば、レビューまで完了して振�
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
   const ui = await $.ui.mount({ ...PANE, surface: 'terminal' })
-  expect((await ui.find({ type: 'Text', text: /☑ 6\./ }))?.text).toContain('6. できあがりを')
+  expect((await ui.find({ type: 'Text', text: /☑ 6\./ }))?.text).toContain('6. 残りの PR と')
   expect((await ui.find({ type: 'Text', text: /\/retro を呼ぶ/ }))).toBeDefined()
   await ui.unmount()
 })

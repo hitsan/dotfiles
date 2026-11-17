@@ -19,8 +19,8 @@ const NEXT: Record<Stage, string> = {
   spec: '/poc を呼ぶ。要求を聞き、デモで確かめてから SPEC.md を一緒に書きます',
   backlog: '/poc を呼ぶ。BACKLOG.md の下書きと質問の続きをします',
   settings: '/poc を呼ぶ。テスト・設定・コミットを仕上げます',
-  loop: '新しいセッションで /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める',
-  review: '/review を呼ぶ。デモのシナリオを実装で動かし、SPEC の完了条件を満たすか確かめます',
+  loop: '新しいセッションで /goal BACKLOG.md の todo が空になるまで /build-next を繰り返す。3 時間たったら止める。通知が来たら PR に OK か「修正: ...」をコメントする',
+  review: '/review を呼ぶ。未レビューの PR と、確かめていない SPEC の完了条件を一緒に見ます',
   rebuild: '/retro を呼ぶ。結果の要約と blocked の原因の切り分け・直しを手伝います',
   done: '/retro を呼ぶ。結果を振り返ります。追加があれば /poc で要求から伝える',
 }
