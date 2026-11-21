@@ -47,3 +47,4 @@ load_plugins {
 theme "nord"
 default_layout "compact"
 show_startup_tips false
+session_serialization false
